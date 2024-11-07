@@ -1,4 +1,5 @@
-#include "esp_err.h"
+#include "credentials.h"
+#include "dht.h"
 #include "esp_log.h"
 #include "network.c"
 #include "nvs_flash.h"
@@ -24,5 +25,14 @@ void app_main() {
     }
     ESP_LOGW(MAIN_TAG, "wifi connection attempt %i failed", attempts);
     sleep(2);
+  }
+
+  float humidity = 0;
+  float temp = 0;
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  while (true) {
+    dht_read_float_data(DHT_TYPE_DHT11, DHT11_GPIO_NUMBER, &humidity, &temp);
+    ESP_LOGI(MAIN_TAG, "temperature %f - humidity %f", temp, humidity);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
 }
