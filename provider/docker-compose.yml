@@ -1,0 +1,14 @@
+name: "esp32-env-monitor"
+services:
+  api:
+    build: .
+    image: api:dev
+    restart: always
+    ports:
+      - 3080:3080
+    environment:
+      - MIN_LOG_LEVEL=${MIN_LOG_LEVEL}
+      - DATABASE_PATH=${DATABASE_PATH}
+    container_name: esp32-env-monitor
+    volumes:
+      - ./data.db:/usr/data.db

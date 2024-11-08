@@ -1,0 +1,8 @@
+[build]
+cmd = "go build -o ./build/main cmd/main.go"
+bin = "./build/main"
+include_ext = ["go"]
+exclude_dir = ["build", "vendor"]
+
+[log]
+level = "debug"
