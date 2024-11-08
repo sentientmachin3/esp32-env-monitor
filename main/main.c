@@ -27,14 +27,15 @@ void app_main() {
     sleep(2);
   }
 
-  float humidity = 0;
-  float temp = 0;
+  int16_t humidity = 0;
+  int16_t temp = 0;
   vTaskDelay(1000 / portTICK_PERIOD_MS);
   while (true) {
-    esp_err_t error = dht_read_float_data(DHT_TYPE_DHT11, DHT11_GPIO_NUMBER,
-                                          &humidity, &temp);
-    if (error != ESP_OK) {
-      ESP_LOGI(MAIN_TAG, "temperature %f - humidity %f", temp, humidity);
+    esp_err_t error =
+        dht_read_data(DHT_TYPE_DHT11, DHT11_GPIO_NUMBER, &humidity, &temp);
+    if (error == ESP_OK) {
+      ESP_LOGI(MAIN_TAG, "temperature %i - humidity %i", temp / 10,
+               humidity / 10);
     } else {
       ESP_LOGE(MAIN_TAG, "error %s", esp_err_to_name(error));
     }
