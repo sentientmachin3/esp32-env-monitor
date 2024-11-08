@@ -52,7 +52,7 @@ Mkfile.old
 dkms.conf
 
 # Extras
-build/
-.cache/
-main/credentials.h
-managed_components/
+**/.cache/
+sensing/build/
+sensing/main/credentials.h
+sensing/managed_components/
