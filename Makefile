@@ -11,12 +11,12 @@ flash: ## Flash the esp app to /dev/ttyUSB0
 	idf.py -C sensing -p /dev/ttyUSB0 app-flash
 
 .PHONY: serial
-monitor: ## Open the serial console
+serial: ## Open the serial console
 	idf.py -C sensing monitor
 
 .PHONY: app
 app: ## Builds, flashes and open the serial for the esp app
-	build flash serial
+	make build flash serial
 
 .PHONY: setup
 setup: ## Full build of the esp project
@@ -38,3 +38,7 @@ logs: ## Show logs of the docker compose image
 .PHONY: restart
 restart: ## Restart the compose project
 	docker-compose -f provider/docker-compose.yml restart
+
+.PHONY: go-build
+go-build: ## Build the go server
+	cd provider && go build -o build/main cmd/main.go
