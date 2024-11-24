@@ -78,3 +78,5 @@ go.work.sum
 
 # env file
 provider/.env
+provider/data.db
+provider/build

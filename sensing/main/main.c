@@ -9,6 +9,7 @@ void app_main() {
   esp_log_level_set(MAIN_TAG, ESP_LOG_VERBOSE);
   esp_log_level_set(NET_TAG, ESP_LOG_VERBOSE);
   esp_log_level_set(DHT_TAG, ESP_LOG_VERBOSE);
+  esp_log_level_set(SNTP_TAG, ESP_LOG_VERBOSE);
 
   wifi_init();
 }

@@ -7,6 +7,7 @@
 #include "lwip/sockets.h"
 #include "nvs_flash.h"
 #include "sensing.c"
+#include "sntp.c"
 
 static const char *NET_TAG = "network";
 
@@ -52,6 +53,7 @@ void wifi_event_handler(void *arg, esp_event_base_t event_base,
   if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
     ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
     ESP_LOGI(NET_TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
+    init_sntp();
     int sockfd = init_tcp_socket(REMOTE_IP, REMOTE_PORT);
     start_data_collection(sockfd);
   }
