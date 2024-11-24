@@ -80,3 +80,4 @@ go.work.sum
 provider/.env
 provider/data.db
 provider/build
+provider/main
