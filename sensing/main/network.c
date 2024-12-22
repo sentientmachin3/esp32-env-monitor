@@ -1,4 +1,3 @@
-#include "cc.h"
 #include "credentials.h"
 #include "esp_interface.h"
 #include "esp_log.h"
@@ -8,6 +7,7 @@
 #include "nvs_flash.h"
 #include "sensing.c"
 #include "sntp.c"
+#include "state.h"
 
 static const char *NET_TAG = "network";
 
@@ -54,6 +54,7 @@ void wifi_event_handler(void *arg, esp_event_base_t event_base,
     ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
     ESP_LOGI(NET_TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
     init_sntp();
+    set_status(CONNECTED);
     int sockfd = init_tcp_socket(REMOTE_IP, REMOTE_PORT);
     start_data_collection(sockfd);
   }
@@ -89,5 +90,6 @@ void wifi_init() {
 
   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
   ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
+  set_status(CONNECTING);
   ESP_ERROR_CHECK(esp_wifi_start());
 }
