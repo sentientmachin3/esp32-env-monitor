@@ -8,7 +8,6 @@ help: ## Shows this help
 build: ## Build the esp app
 	idf.py -C sensing app
 
-
 .PHONY: shell
 shell: ## Spawns a shell inside container
 	docker exec -it esp32-env-monitor /bin/sh
@@ -46,6 +45,10 @@ logs: ## Show logs of the docker compose image
 restart: ## Restart the compose project
 	docker-compose -f provider/docker-compose.yml restart
 
-.PHONY: go-build
-go-build: ## Build the go server
-	cd provider && go build -o build/main cmd/main.go
+.PHONY: stop
+stop: ## Restart the compose project
+	docker-compose -f provider/docker-compose.yml stop
+
+.PHONY: go
+go: ## Build the go server
+	cd provider && go build -o build/main cmd/main.go cmd/datasync.go cmd/api.go cmd/service.go
