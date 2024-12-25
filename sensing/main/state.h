@@ -19,3 +19,5 @@ void handle_INITIALIZING();
 void handle_IDLE();
 
 void set_status(Status next);
+
+void state_monitor();

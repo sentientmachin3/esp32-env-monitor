@@ -21,5 +21,6 @@ void app_main() {
   esp_log_level_set(S_TAG, ESP_LOG_VERBOSE);
 
   gpio_init();
+  xTaskCreate(state_monitor, "state_monitor", 2048, NULL, 1, NULL);
   wifi_init();
 }
