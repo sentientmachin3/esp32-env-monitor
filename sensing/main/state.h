@@ -1,6 +1,6 @@
 #pragma once
 
-typedef enum { CONNECTING, INITIALIZING, ACTIVE, IDLE, ERROR } Status;
+typedef enum { CONNECTING, INITIALIZING, ACTIVE, ERROR } Status;
 
 static Status global_status = INITIALIZING;
 
@@ -11,8 +11,6 @@ void handle_ACTIVE();
 void handle_CONNECTING();
 
 void handle_INITIALIZING();
-
-void handle_IDLE();
 
 void handle_ERROR();
 

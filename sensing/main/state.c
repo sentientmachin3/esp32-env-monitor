@@ -13,8 +13,6 @@ char *status_str(Status status) {
     return "INITIALIZING";
   case ACTIVE:
     return "ACTIVE";
-  case IDLE:
-    return "IDLE";
   case ERROR:
     return "ERROR";
   default:
@@ -23,8 +21,13 @@ char *status_str(Status status) {
 }
 
 void handle_ACTIVE() {
-  gpio_set_level(STATUS_KO_GPIO, 0);
-  gpio_set_level(STATUS_OK_GPIO, 1);
+  while (global_status == ACTIVE) {
+    gpio_set_level(STATUS_KO_GPIO, 0);
+    gpio_set_level(STATUS_OK_GPIO, 1);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
+    gpio_set_level(STATUS_OK_GPIO, 0);
+    vTaskDelay(2000 / portTICK_PERIOD_MS);
+  }
 }
 
 void handle_CONNECTING() {
@@ -49,11 +52,6 @@ void handle_INITIALIZING() {
   }
 }
 
-void handle_IDLE() {
-  gpio_set_level(STATUS_KO_GPIO, 0);
-  gpio_set_level(STATUS_OK_GPIO, 0);
-}
-
 void handle_ERROR() {
   gpio_set_level(STATUS_OK_GPIO, 0);
   while (global_status == ERROR) {
@@ -72,7 +70,6 @@ void set_status(Status next) {
 
 void state_monitor() {
   while (true) {
-    vTaskDelay(100 / portTICK_PERIOD_MS);
     switch (global_status) {
     case CONNECTING:
       handle_CONNECTING();
@@ -82,9 +79,6 @@ void state_monitor() {
       break;
     case ERROR:
       handle_ERROR();
-      break;
-    case IDLE:
-      handle_IDLE();
       break;
     case ACTIVE:
       handle_ACTIVE();
