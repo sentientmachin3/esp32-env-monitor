@@ -52,3 +52,7 @@ stop: ## Restart the compose project
 .PHONY: go
 go: ## Build the go server
 	cd provider && go build -o build/main cmd/main.go cmd/datasync.go cmd/api.go cmd/service.go
+
+.PHONY: web
+web: ## Start locally the webapp
+	cd web && pnpm dev
