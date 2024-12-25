@@ -54,7 +54,7 @@ void wifi_event_handler(void *arg, esp_event_base_t event_base,
     ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
     ESP_LOGI(NET_TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
     init_sntp();
-    set_status(CONNECTED);
+    set_status(ACTIVE);
     int sockfd = init_tcp_socket(REMOTE_IP, REMOTE_PORT);
     start_data_collection(sockfd);
   }
@@ -75,12 +75,10 @@ void wifi_init() {
   wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
-  ESP_LOGD(NET_TAG, "registering handlers...");
   esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID,
                                       &wifi_event_handler, NULL, NULL);
   esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP,
                                       &wifi_event_handler, NULL, NULL);
-  ESP_LOGD(NET_TAG, "handlers registered");
 
   wifi_config_t wifi_config = {
       .sta =

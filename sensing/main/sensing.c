@@ -16,6 +16,11 @@ void dht_collect(int sockfd) {
   while (true) {
     set_status(ACTIVE);
     dht_read_data(DHT_TYPE_DHT11, DHT11_GPIO_NUMBER, &humidity, &temp);
+    if (humidity == 0 && temp == 0) {
+      ESP_LOGE(DHT_TAG, "dht sensor not initialized, reboot required");
+      set_status(ERROR);
+      return;
+    }
     char *payload = (char *)malloc(32 * sizeof(char));
     time_t now;
     time(&now);

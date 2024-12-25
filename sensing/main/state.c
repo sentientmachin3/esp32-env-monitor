@@ -11,12 +11,12 @@ char *status_str(Status status) {
     return "CONNECTING";
   case INITIALIZING:
     return "INITIALIZING";
-  case CONNECTED:
-    return "CONNECTED";
   case ACTIVE:
     return "ACTIVE";
   case IDLE:
     return "IDLE";
+  case ERROR:
+    return "ERROR";
   default:
     return "INVALID";
   }
@@ -25,16 +25,6 @@ char *status_str(Status status) {
 void handle_ACTIVE() {
   gpio_set_level(STATUS_KO_GPIO, 0);
   gpio_set_level(STATUS_OK_GPIO, 1);
-}
-
-void handle_CONNECTED() {
-  gpio_set_level(STATUS_KO_GPIO, 0);
-  while (global_status == CONNECTED) {
-    gpio_set_level(STATUS_OK_GPIO, 1);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-    gpio_set_level(STATUS_OK_GPIO, 1);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-  }
 }
 
 void handle_CONNECTING() {
@@ -50,11 +40,11 @@ void handle_CONNECTING() {
 void handle_INITIALIZING() {
   while (global_status == INITIALIZING) {
     gpio_set_level(STATUS_OK_GPIO, 1);
-    gpio_set_level(STATUS_OK_GPIO, 1);
+    gpio_set_level(STATUS_KO_GPIO, 1);
     vTaskDelay(100 / portTICK_PERIOD_MS);
 
     gpio_set_level(STATUS_OK_GPIO, 0);
-    gpio_set_level(STATUS_OK_GPIO, 0);
+    gpio_set_level(STATUS_KO_GPIO, 0);
     vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
 }
@@ -64,14 +54,23 @@ void handle_IDLE() {
   gpio_set_level(STATUS_OK_GPIO, 0);
 }
 
+void handle_ERROR() {
+  gpio_set_level(STATUS_OK_GPIO, 0);
+  while (global_status == ERROR) {
+    gpio_set_level(STATUS_KO_GPIO, 1);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+    gpio_set_level(STATUS_KO_GPIO, 0);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
+}
+
 void set_status(Status next) {
-  global_status = next;
   ESP_LOGI(S_TAG, "%s => %s", status_str(global_status), status_str(next));
+  global_status = next;
   return;
 }
 
 void state_monitor() {
-  // ESP_LOGI(S_TAG, "starting state monitor");
   while (true) {
     vTaskDelay(100 / portTICK_PERIOD_MS);
     switch (global_status) {
@@ -81,8 +80,8 @@ void state_monitor() {
     case INITIALIZING:
       handle_INITIALIZING();
       break;
-    case CONNECTED:
-      handle_CONNECTED();
+    case ERROR:
+      handle_ERROR();
       break;
     case IDLE:
       handle_IDLE();
