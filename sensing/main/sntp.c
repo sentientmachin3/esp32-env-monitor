@@ -1,7 +1,7 @@
-#include "credentials.h"
 #include "esp_log.h"
 #include "esp_netif_sntp.h"
 #include "esp_sntp.h"
+#include "locals.h"
 #include <sys/time.h>
 
 static const char *SNTP_TAG = "SNTP";

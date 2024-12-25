@@ -2,6 +2,7 @@
 #include "dht.h"
 #include "esp_log.h"
 #include "freertos/idf_additions.h"
+#include "locals.h"
 #include "lwip/sockets.h"
 #include "state.h"
 #include "time.h"

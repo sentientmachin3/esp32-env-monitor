@@ -1,7 +1,5 @@
 #pragma once
 
-static const char *S_TAG = "state";
-
 typedef enum { CONNECTING, INITIALIZING, ACTIVE, IDLE, ERROR } Status;
 
 static Status global_status = INITIALIZING;

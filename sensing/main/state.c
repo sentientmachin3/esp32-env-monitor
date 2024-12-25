@@ -1,8 +1,8 @@
 #include "state.h"
-#include "credentials.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "freertos/idf_additions.h"
+#include "locals.h"
 #include "state.h"
 
 char *status_str(Status status) {
@@ -65,7 +65,7 @@ void handle_ERROR() {
 }
 
 void set_status(Status next) {
-  ESP_LOGI(S_TAG, "%s => %s", status_str(global_status), status_str(next));
+  ESP_LOGI(TAG, "%s => %s", status_str(global_status), status_str(next));
   global_status = next;
   return;
 }
@@ -90,7 +90,7 @@ void state_monitor() {
       handle_ACTIVE();
       break;
     default:
-      ESP_LOGE(S_TAG, "invalid status %i", global_status);
+      ESP_LOGE(TAG, "invalid status %i", global_status);
     }
   }
 }

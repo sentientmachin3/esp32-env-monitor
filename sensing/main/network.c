@@ -3,56 +3,55 @@
 #include "esp_log.h"
 #include "esp_wifi.h"
 #include "esp_wifi_types_generic.h"
+#include "locals.h"
 #include "lwip/sockets.h"
 #include "nvs_flash.h"
 #include "sensing.c"
 #include "sntp.c"
 #include "state.h"
 
-static const char *NET_TAG = "network";
-
 int init_tcp_socket(char *host, int port) {
-  ESP_LOGD(NET_TAG, "setting up socket");
+  ESP_LOGD(TAG, "setting up socket");
   int sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
   if (sockfd < 0) {
-    ESP_LOGE(NET_TAG, "unable to create socket: errno %d", errno);
+    ESP_LOGE(TAG, "unable to create socket: errno %d", errno);
     return -1;
   }
   const struct sockaddr_in server_addr = {.sin_addr.s_addr = inet_addr(host),
                                           .sin_family = AF_INET,
                                           .sin_port = htons(port)};
-  ESP_LOGI(NET_TAG, "socket created, connecting to %s:%d", host, port);
+  ESP_LOGI(TAG, "socket created, connecting to %s:%d", host, port);
   int err =
       connect(sockfd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
   if (err != 0) {
-    ESP_LOGE(NET_TAG, "socket unable to connect: errno %d", errno);
+    ESP_LOGE(TAG, "socket unable to connect: errno %d", errno);
     close(sockfd);
     return -1;
   }
-  ESP_LOGI(NET_TAG, "connected");
+  ESP_LOGI(TAG, "connected");
   return sockfd;
 }
 
 void wifi_event_handler(void *arg, esp_event_base_t event_base,
                         int32_t event_id, void *event_data) {
-  ESP_LOGI(NET_TAG, "event_base %s, evt %li", event_base, (long int)event_id);
+  ESP_LOGI(TAG, "event_base %s, evt %li", event_base, (long int)event_id);
   if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
     esp_wifi_connect();
     return;
   }
 
   if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_CONNECTED) {
-    ESP_LOGI(NET_TAG, "wifi connected");
+    ESP_LOGI(TAG, "wifi connected");
   }
 
   if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-    ESP_LOGI(NET_TAG, "wifi disconnected");
+    ESP_LOGI(TAG, "wifi disconnected");
     return;
   }
 
   if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
     ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
-    ESP_LOGI(NET_TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
+    ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
     init_sntp();
     set_status(ACTIVE);
     int sockfd = init_tcp_socket(REMOTE_IP, REMOTE_PORT);
