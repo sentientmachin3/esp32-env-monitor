@@ -33,7 +33,7 @@ export function MainChart({
       >
         <LineChart syncId={"sync"} width={500} height={300} data={stats}>
           <XAxis
-            name={"Temperature"}
+            label={"Temperature"}
             scale={"time"}
             dataKey={"timestamp"}
             tickFormatter={timeFormatter}
@@ -42,13 +42,13 @@ export function MainChart({
           />
           <YAxis domain={[0, 50]} />
           <Tooltip />
-          <Legend />
           <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
           <Line
             type="monotone"
             dataKey="temperature"
             stroke="#82ca9d"
             activeDot={{ r: 8 }}
+            dot={false}
           />
         </LineChart>
       </ResponsiveContainer>
@@ -60,7 +60,7 @@ export function MainChart({
       >
         <LineChart syncId={"sync"} width={500} height={300} data={stats}>
           <XAxis
-            name={"Humidity"}
+            label={"Humidity"}
             scale={"time"}
             dataKey={"timestamp"}
             tickFormatter={timeFormatter}
@@ -69,13 +69,13 @@ export function MainChart({
           />
           <YAxis domain={[20, 90]} />
           <Tooltip />
-          <Legend />
           <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
           <Line
             type="monotone"
             dataKey="humidity"
             stroke="#8884d8"
             activeDot={{ r: 8 }}
+            dot={false}
           />
         </LineChart>
       </ResponsiveContainer>
