@@ -13,7 +13,7 @@ import (
 func SetupRoutes(r *gin.Engine, logger *zap.SugaredLogger, db *sql.DB) {
 	r.Use(logWrapper(logger))
 	r.Use(dbConnWrapper(db))
-	r.GET("/stats", handleStats)
+	r.GET("/records", handleRecords)
 }
 
 func logWrapper(logger *zap.SugaredLogger) gin.HandlerFunc {
@@ -29,21 +29,21 @@ func dbConnWrapper(db *sql.DB) gin.HandlerFunc {
 	}
 }
 
-func handleStats(context *gin.Context) {
+func handleRecords(context *gin.Context) {
 	query := context.Request.URL.Query()
 	contextDb, _ := context.Get("db")
 	contextLogger, _ := context.Get("log")
 	db := contextDb.(*sql.DB)
 	logger := contextLogger.(*zap.SugaredLogger)
-	var jsonRows []*Stat
+	var jsonRows []*Record
 	if query == nil {
-		stats, _ := FetchAllStats(db, logger)
-		jsonRows = stats
+		records, _ := FetchAllRecords(db, logger)
+		jsonRows = records
 	} else {
 		intervalStart, _ := strconv.Atoi(query.Get("start"))
 		intervalEnd, _ := strconv.Atoi(query.Get("end"))
-		stats, err := FetchStats(db, logger, intervalStart, intervalEnd)
-		jsonRows = stats
+		records, err := FetchRecords(db, logger, intervalStart, intervalEnd)
+		jsonRows = records
 		if err != nil {
 			context.Status(http.StatusInternalServerError)
 			return
