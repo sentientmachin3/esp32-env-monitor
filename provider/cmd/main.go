@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"sync"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	_ "modernc.org/sqlite"
@@ -37,6 +38,7 @@ func tcpHandler(db *sql.DB, log *zap.SugaredLogger) {
 func httpHandler(db *sql.DB, log *zap.SugaredLogger) {
 	log.Debugln("setting up http endpoints")
 	r := gin.Default()
+	r.Use(cors.Default())
 	SetupRoutes(r, log, db)
 	r.Run(":3080")
 }
