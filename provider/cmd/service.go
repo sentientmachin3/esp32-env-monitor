@@ -14,6 +14,7 @@ type Stat struct {
 }
 
 func FetchStats(db *sql.DB, log *zap.SugaredLogger, start int, end int) ([]*Stat, error) {
+	log.Infoln("loading stats from %i to %i", start, end)
 	result, err := db.Query("SELECT * FROM records WHERE timestamp BETWEEN $1 AND $2", start, end)
 	if err != nil {
 		log.Errorln("interval stats failed", err)

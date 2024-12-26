@@ -36,12 +36,12 @@ func handleStats(context *gin.Context) {
 	db := contextDb.(*sql.DB)
 	logger := contextLogger.(*zap.SugaredLogger)
 	var jsonRows []*Stat
-	if query != nil {
+	if query == nil {
 		stats, _ := FetchAllStats(db, logger)
 		jsonRows = stats
 	} else {
-		intervalStart, _ := strconv.Atoi(query.Get("startInterval"))
-		intervalEnd, _ := strconv.Atoi(query.Get("endInterval"))
+		intervalStart, _ := strconv.Atoi(query.Get("start"))
+		intervalEnd, _ := strconv.Atoi(query.Get("end"))
 		stats, err := FetchStats(db, logger, intervalStart, intervalEnd)
 		jsonRows = stats
 		if err != nil {

@@ -18,10 +18,10 @@ export function ValueBox({
       <CardHeader className="flex-col text-center">
         <p className="uppercase tracking-wide">{label}</p>
         <small className="font-semibold text-lg">
-          {moment.format(DATETIME_FORMAT)}
+          {moment ? moment.format(DATETIME_FORMAT) : "--/--/-- --:--:--"}
         </small>
       </CardHeader>
-      <CardBody className="p-2 font-bold text-5xl text-center">{`${value} ${suffix}`}</CardBody>
+      <CardBody className="p-2 font-bold text-5xl text-center">{`${value ?? "--"} ${suffix}`}</CardBody>
     </Card>
   )
 }

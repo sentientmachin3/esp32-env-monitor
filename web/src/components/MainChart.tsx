@@ -15,7 +15,8 @@ import {
 } from "recharts"
 
 export function MainChart({ stats }: { stats: Stat[] }) {
-  const timeFormatter = (time: Date) => moment(time).format(DATETIME_FORMAT)
+  const timeFormatter = (time: number) =>
+    moment.unix(time).format(DATETIME_FORMAT)
 
   return (
     <div>
@@ -26,8 +27,9 @@ export function MainChart({ stats }: { stats: Stat[] }) {
       >
         <LineChart syncId={"sync"} width={500} height={300} data={stats}>
           <XAxis
-            dataKey={(stat: Stat) => moment.unix(stat.timestamp).toDate()}
-            scale="time"
+            name={"Temperature"}
+            scale={"time"}
+            dataKey={"timestamp"}
             tickFormatter={timeFormatter}
             type="number"
             domain={["auto", "auto"]}
@@ -52,8 +54,9 @@ export function MainChart({ stats }: { stats: Stat[] }) {
       >
         <LineChart syncId={"sync"} width={500} height={300} data={stats}>
           <XAxis
-            scale="time"
-            dataKey={(stat: Stat) => moment.unix(stat.timestamp).toDate()}
+            name={"Humidity"}
+            scale={"time"}
+            dataKey={"timestamp"}
             tickFormatter={timeFormatter}
             type="number"
             domain={["auto", "auto"]}
