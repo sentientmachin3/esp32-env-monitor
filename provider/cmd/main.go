@@ -37,7 +37,8 @@ func tcpHandler(db *sql.DB, log *zap.SugaredLogger) {
 
 func httpHandler(db *sql.DB, log *zap.SugaredLogger) {
 	log.Debugln("setting up http endpoints")
-	r := gin.Default()
+	r := gin.New()
+	r.Use(gin.Recovery())
 	r.Use(cors.Default())
 	SetupRoutes(r, log, db)
 	r.Run(":3080")

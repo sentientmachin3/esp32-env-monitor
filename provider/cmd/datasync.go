@@ -30,14 +30,21 @@ func InitTcpSocket(log *zap.SugaredLogger, db *sql.DB) {
 func handle(conn net.Conn, db *sql.DB, log *zap.SugaredLogger) {
 	for {
 		buffer := make([]byte, 16)
-		conn.Read(buffer)
+		readBytes, err := conn.Read(buffer)
+		if readBytes == 0 {
+			time.Sleep(time.Second)
+			continue
+		}
+		if err != nil {
+			log.Errorln("unable to read data from socket", err)
+			continue
+		}
 		data := string(buffer)
-
 		values := strings.Split(data, ",")
 		timestamp, _ := strconv.Atoi(values[0])
 		temperature, _ := strconv.Atoi(values[1])
 		humidity, _ := strconv.Atoi(values[2])
-		_, err := db.Exec("INSERT INTO records(timestamp, temperature, humidity) VALUES ($1, $2, $3)", timestamp, temperature, humidity)
+		_, err = db.Exec("INSERT INTO records(timestamp, temperature, humidity) VALUES ($1, $2, $3)", timestamp, temperature, humidity)
 		if err != nil {
 			log.Errorln("error writing data to db", err)
 		}
