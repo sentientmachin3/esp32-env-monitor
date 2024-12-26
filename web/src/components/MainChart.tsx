@@ -14,7 +14,13 @@ import {
   YAxis,
 } from "recharts"
 
-export function MainChart({ stats }: { stats: Stat[] }) {
+export function MainChart({
+  stats,
+  height,
+}: {
+  stats: Stat[]
+  height: number
+}) {
   const timeFormatter = (time: number) =>
     moment.unix(time).format(DATETIME_FORMAT)
 
@@ -22,7 +28,7 @@ export function MainChart({ stats }: { stats: Stat[] }) {
     <div>
       <ResponsiveContainer
         width="100%"
-        height={window.innerHeight / 2}
+        height={height / 2}
         className="px-8 py-8"
       >
         <LineChart syncId={"sync"} width={500} height={300} data={stats}>
@@ -34,7 +40,7 @@ export function MainChart({ stats }: { stats: Stat[] }) {
             type="number"
             domain={["auto", "auto"]}
           />
-          <YAxis />
+          <YAxis domain={[0, 50]} />
           <Tooltip />
           <Legend />
           <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
@@ -49,7 +55,7 @@ export function MainChart({ stats }: { stats: Stat[] }) {
 
       <ResponsiveContainer
         width="100%"
-        height={window.innerHeight / 2}
+        height={height / 2}
         className="px-8 py-8"
       >
         <LineChart syncId={"sync"} width={500} height={300} data={stats}>
@@ -61,7 +67,7 @@ export function MainChart({ stats }: { stats: Stat[] }) {
             type="number"
             domain={["auto", "auto"]}
           />
-          <YAxis />
+          <YAxis domain={[20, 90]} />
           <Tooltip />
           <Legend />
           <CartesianGrid stroke="#eee" strokeDasharray="5 5" />

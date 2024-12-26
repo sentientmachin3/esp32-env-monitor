@@ -12,6 +12,7 @@ import { useEffect, useState } from "react"
 export default function Home() {
   const [stats, setStats] = useState<Stat[]>([])
   const [loading, setLoading] = useState(false)
+  const [height, setHeight] = useState(920)
 
   const refreshData = () => {
     setLoading(true)
@@ -30,10 +31,13 @@ export default function Home() {
       })
   }
 
-  useEffect(() => refreshData(), [])
+  useEffect(() => {
+    refreshData()
+    setHeight(window.innerHeight)
+  }, [])
 
   return (
-    <div className="flex px-8 py-6">
+    <div className="flex px-8 py-6 h-full">
       <div className="flex flex-col max-w-15 gap-4">
         <ValueBox
           label={"Temperature"}
@@ -55,7 +59,7 @@ export default function Home() {
         </Button>
       </div>
       <div className="flex-1">
-        <MainChart stats={stats} />
+        <MainChart stats={stats} height={height} />
       </div>
     </div>
   )
