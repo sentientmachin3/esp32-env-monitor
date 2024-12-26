@@ -8,6 +8,7 @@ import { Spinner } from "@nextui-org/spinner"
 import { Button } from "@nextui-org/button"
 import moment from "moment"
 import { useEffect, useState } from "react"
+import { StatusBox } from "@/components/StatusBox"
 
 export default function Home() {
   const [stats, setStats] = useState<Stat[]>([])
@@ -31,23 +32,28 @@ export default function Home() {
       })
   }
 
+  const lastStat: (stats: Stat[]) => Stat | undefined = (stats: Stat[]) =>
+    stats[stats.length - 1]
+
   useEffect(() => {
     refreshData()
+    setInterval(() => refreshData(), 10_000)
     setHeight(window.innerHeight)
   }, [])
 
   return (
     <div className="flex px-8 py-6 h-full">
       <div className="flex flex-col max-w-15 gap-4">
+        <StatusBox lastStat={lastStat(stats)} />
         <ValueBox
           label={"Temperature"}
-          value={stats[stats.length - 1]?.temperature}
+          value={lastStat(stats)?.temperature}
           moment={moment.unix(stats[stats.length - 1]?.timestamp)}
           suffix={"°C"}
         />
         <ValueBox
           label={"Humidity"}
-          value={stats[stats.length - 1]?.humidity}
+          value={lastStat(stats)?.humidity}
           moment={moment.unix(stats[stats.length - 1]?.timestamp)}
           suffix={"%"}
         />

@@ -5,7 +5,6 @@ import { DATETIME_FORMAT } from "@/utils"
 import moment from "moment"
 import {
   CartesianGrid,
-  Legend,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -33,7 +32,6 @@ export function MainChart({
       >
         <LineChart syncId={"sync"} width={500} height={300} data={stats}>
           <XAxis
-            label={"Temperature"}
             scale={"time"}
             dataKey={"timestamp"}
             tickFormatter={timeFormatter}
@@ -60,7 +58,6 @@ export function MainChart({
       >
         <LineChart syncId={"sync"} width={500} height={300} data={stats}>
           <XAxis
-            label={"Humidity"}
             scale={"time"}
             dataKey={"timestamp"}
             tickFormatter={timeFormatter}

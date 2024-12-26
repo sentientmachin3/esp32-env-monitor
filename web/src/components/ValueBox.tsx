@@ -9,7 +9,7 @@ export function ValueBox({
   suffix,
 }: {
   label: string
-  value: number
+  value: number | undefined
   moment: Moment
   suffix: string
 }) {
