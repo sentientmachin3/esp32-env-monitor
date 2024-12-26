@@ -10,7 +10,12 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        temperature: "#82ca9d",
+        humidity: "#8884d8",
+      },
+    },
   },
   plugins: [],
 } satisfies Config

@@ -1,7 +1,7 @@
 "use client"
 
 import { Stat } from "@/types"
-import { DATETIME_FORMAT } from "@/utils"
+import { DATETIME_FORMAT, HUMIDITY_SUFFIX, TEMPERATURE_SUFFIX } from "@/utils"
 import moment from "moment"
 import {
   CartesianGrid,
@@ -39,7 +39,16 @@ export function MainChart({
             domain={["auto", "auto"]}
           />
           <YAxis domain={[0, 50]} />
-          <Tooltip />
+          <Tooltip
+            wrapperStyle={{ outline: "none" }}
+            formatter={(value) => [
+              `${value} ${TEMPERATURE_SUFFIX}`,
+              "Temperature",
+            ]}
+            labelFormatter={(label) =>
+              moment.unix(Number(label)).format(DATETIME_FORMAT)
+            }
+          />
           <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
           <Line
             type="monotone"
@@ -64,8 +73,14 @@ export function MainChart({
             type="number"
             domain={["auto", "auto"]}
           />
+          <Tooltip
+            wrapperStyle={{ outline: "none" }}
+            formatter={(value) => [`${value} ${HUMIDITY_SUFFIX}`, "Humidity"]}
+            labelFormatter={(label) =>
+              moment.unix(Number(label)).format(DATETIME_FORMAT)
+            }
+          />
           <YAxis domain={[20, 90]} />
-          <Tooltip />
           <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
           <Line
             type="monotone"

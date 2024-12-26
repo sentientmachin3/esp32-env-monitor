@@ -3,7 +3,7 @@
 import { MainChart } from "@/components/MainChart"
 import { ValueBox } from "@/components/ValueBox"
 import { Stat } from "@/types"
-import { httpClient } from "@/utils"
+import { httpClient, HUMIDITY_SUFFIX, TEMPERATURE_SUFFIX } from "@/utils"
 import { Spinner } from "@nextui-org/spinner"
 import { Button } from "@nextui-org/button"
 import moment from "moment"
@@ -49,13 +49,13 @@ export default function Home() {
           label={"Temperature"}
           value={lastStat(stats)?.temperature}
           moment={moment.unix(stats[stats.length - 1]?.timestamp)}
-          suffix={"°C"}
+          suffix={TEMPERATURE_SUFFIX}
         />
         <ValueBox
           label={"Humidity"}
           value={lastStat(stats)?.humidity}
           moment={moment.unix(stats[stats.length - 1]?.timestamp)}
-          suffix={"%"}
+          suffix={HUMIDITY_SUFFIX}
         />
         <Button
           className="flex bg-black text-white font-semibold uppercase justify-center rounded-md px-2 py-2 outline-none"
