@@ -21,3 +21,5 @@ ESP32 based environment temperature and humidity monitor. The repo composes of:
 - CONNECTING: green OFF, red ON for 100 ms every second
 - ACTIVE: red OFF, green ON for 50 ms every two seconds
 - ERROR: green OFF, red ON in 500 ms cycles
+
+**Open to critics.**
