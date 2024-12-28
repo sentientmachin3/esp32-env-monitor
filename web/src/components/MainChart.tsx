@@ -1,6 +1,6 @@
 "use client"
 
-import { Stat } from "@/types"
+import { Record } from "@/types"
 import { DATETIME_FORMAT, HUMIDITY_SUFFIX, TEMPERATURE_SUFFIX } from "@/utils"
 import moment from "moment"
 import {
@@ -17,7 +17,7 @@ export function MainChart({
   stats,
   height,
 }: {
-  stats: Stat[]
+  stats: Record[]
   height: number
 }) {
   const timeFormatter = (time: number) =>

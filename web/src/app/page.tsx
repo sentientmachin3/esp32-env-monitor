@@ -2,18 +2,30 @@
 
 import { MainChart } from "@/components/MainChart"
 import { ValueBox } from "@/components/ValueBox"
-import { Stat } from "@/types"
+import { Record } from "@/types"
 import { httpClient, HUMIDITY_SUFFIX, TEMPERATURE_SUFFIX } from "@/utils"
 import { Spinner } from "@nextui-org/spinner"
 import { Button } from "@nextui-org/button"
 import moment from "moment"
 import { useEffect, useState } from "react"
 import { StatusBox } from "@/components/StatusBox"
+import { UnitConnectionStatus } from "@/types/UnitConnectionStatus"
+import { UnitStatus } from "@/enums"
 
 export default function Home() {
-  const [stats, setStats] = useState<Stat[]>([])
+  const [records, setRecords] = useState<Record[]>([])
+  const [unitStatus, setUnitStatus] = useState<UnitConnectionStatus>({
+    status: UnitStatus.OFFLINE,
+    lastUpdate: undefined,
+  })
   const [loading, setLoading] = useState(false)
   const [height, setHeight] = useState(920)
+
+  const refreshUnitStatus = () => {
+    httpClient.get<UnitConnectionStatus>("/status").then((res) => {
+      setUnitStatus(res.data)
+    })
+  }
 
   const refreshData = () => {
     setLoading(true)
@@ -21,22 +33,23 @@ export default function Home() {
     const oneDayBefore = moment().subtract(30, "minutes")
     httpClient
       .get<
-        Stat[]
-      >("/stats", { headers: { "Content-Type": "application/json" }, params: { start: oneDayBefore.unix(), end: now.unix() } })
+        Record[]
+      >("/records", { params: { start: oneDayBefore.unix(), end: now.unix() } })
       .then((res) => {
-        const incomingStats = (res.data as Stat[])
+        const incomingStats = (res.data as Record[])
           .filter((s) => s.humidity !== 0 && s.temperature !== 0)
           .sort((s1, s2) => s1.timestamp - s2.timestamp)
-        setStats(incomingStats)
+        setRecords(incomingStats)
         setLoading(false)
       })
   }
 
-  const lastStat: (stats: Stat[]) => Stat | undefined = (stats: Stat[]) =>
+  const lastStat: (stats: Record[]) => Record | undefined = (stats: Record[]) =>
     stats[stats.length - 1]
 
   useEffect(() => {
     refreshData()
+    refreshUnitStatus()
     setInterval(() => refreshData(), 10_000)
     setHeight(window.innerHeight)
   }, [])
@@ -44,17 +57,17 @@ export default function Home() {
   return (
     <div className="flex px-8 py-6 h-full">
       <div className="flex flex-col max-w-15 gap-4">
-        <StatusBox lastStat={lastStat(stats)} />
+        <StatusBox unitStatus={unitStatus} />
         <ValueBox
           label={"Temperature"}
-          value={lastStat(stats)?.temperature}
-          moment={moment.unix(stats[stats.length - 1]?.timestamp)}
+          value={lastStat(records)?.temperature}
+          moment={moment.unix(records[records.length - 1]?.timestamp)}
           suffix={TEMPERATURE_SUFFIX}
         />
         <ValueBox
           label={"Humidity"}
-          value={lastStat(stats)?.humidity}
-          moment={moment.unix(stats[stats.length - 1]?.timestamp)}
+          value={lastStat(records)?.humidity}
+          moment={moment.unix(records[records.length - 1]?.timestamp)}
           suffix={HUMIDITY_SUFFIX}
         />
         <Button
@@ -65,7 +78,7 @@ export default function Home() {
         </Button>
       </div>
       <div className="flex-1">
-        <MainChart stats={stats} height={height} />
+        <MainChart stats={records} height={height} />
       </div>
     </div>
   )

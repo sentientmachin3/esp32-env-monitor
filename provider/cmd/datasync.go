@@ -1,16 +1,11 @@
 package main
 
 import (
-	"database/sql"
 	"net"
-	"strconv"
-	"strings"
 	"time"
-
-	"go.uber.org/zap"
 )
 
-func InitTcpSocket(log *zap.SugaredLogger, db *sql.DB) {
+func InitTcpSocket(service *Service) {
 	ln, err := net.Listen("tcp4", ":8080")
 	if err != nil {
 		log.Errorln("err creating socket", err)
@@ -23,11 +18,11 @@ func InitTcpSocket(log *zap.SugaredLogger, db *sql.DB) {
 			log.Errorln("ln.Accept failed", err)
 		}
 		log.Infoln("new connection received", conn.RemoteAddr())
-		go handle(conn, db, log)
+		go handleUnitConnection(conn, service)
 	}
 }
 
-func handle(conn net.Conn, db *sql.DB, log *zap.SugaredLogger) {
+func handleUnitConnection(conn net.Conn, service *Service) {
 	for {
 		buffer := make([]byte, 16)
 		readBytes, err := conn.Read(buffer)
@@ -39,15 +34,7 @@ func handle(conn net.Conn, db *sql.DB, log *zap.SugaredLogger) {
 			log.Errorln("unable to read data from socket", err)
 			continue
 		}
-		data := string(buffer)
-		values := strings.Split(data, ",")
-		timestamp, _ := strconv.Atoi(values[0])
-		temperature, _ := strconv.Atoi(values[1])
-		humidity, _ := strconv.Atoi(values[2])
-		_, err = db.Exec("INSERT INTO records(timestamp, temperature, humidity) VALUES ($1, $2, $3)", timestamp, temperature, humidity)
-		if err != nil {
-			log.Errorln("error writing data to db", err)
-		}
+		service.AppendReading(buffer)
 		time.Sleep(time.Second)
 	}
 }
