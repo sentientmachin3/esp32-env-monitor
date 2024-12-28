@@ -38,9 +38,9 @@ func (service *Service) FetchRecords(start int, end int) ([]*Record, error) {
 	}
 	var records []*Record = make([]*Record, 0)
 	for result.Next() {
-		var record Record
-		result.Scan(record.Id, record.Timestamp, record.Humidity, record.Temperature)
-		records = append(records, &record)
+		var record *Record = &Record{Id: 0, Timestamp: 0, Humidity: 0, Temperature: 0}
+		result.Scan(&record.Id, &record.Timestamp, &record.Humidity, &record.Temperature)
+		records = append(records, record)
 	}
 	return records, nil
 }
@@ -53,9 +53,9 @@ func (service *Service) FetchAllRecords() ([]*Record, error) {
 	}
 	var records []*Record = make([]*Record, 0)
 	for result.Next() {
-		var record Record
-		result.Scan(record.Id, record.Timestamp, record.Humidity, record.Temperature)
-		records = append(records, &record)
+		var record *Record = &Record{Id: 0, Timestamp: 0, Humidity: 0, Temperature: 0}
+		result.Scan(&record.Id, &record.Timestamp, &record.Humidity, &record.Temperature)
+		records = append(records, record)
 	}
 	return records, nil
 }

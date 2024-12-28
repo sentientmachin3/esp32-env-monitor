@@ -34,7 +34,7 @@ export default function Home() {
     httpClient
       .get<
         Record[]
-      >("/records", { params: { start: oneDayBefore.unix(), end: now.unix() } })
+      >("/records", { params: { start: oneDayBefore.toISOString(), end: now.toISOString() } })
       .then((res) => {
         const incomingStats = (res.data as Record[])
           .filter((s) => s.humidity !== 0 && s.temperature !== 0)

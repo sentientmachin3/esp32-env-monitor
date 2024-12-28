@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,9 +21,10 @@ func handleRecords(service *Service) gin.HandlerFunc {
 			records, _ := service.FetchAllRecords()
 			jsonRows = records
 		} else {
-			intervalStart, _ := strconv.Atoi(query.Get("start"))
-			intervalEnd, _ := strconv.Atoi(query.Get("end"))
-			records, err := service.FetchRecords(intervalStart, intervalEnd)
+			intervalStart, _ := time.Parse(time.RFC3339, query.Get("start"))
+			intervalEnd, _ := time.Parse(time.RFC3339, query.Get("end"))
+			log.Debugf("requested logs from %v to %v", intervalStart, intervalEnd)
+			records, err := service.FetchRecords(int(intervalStart.UTC().Unix()), int(intervalEnd.UTC().Unix()))
 			jsonRows = records
 			if err != nil {
 				context.Status(http.StatusInternalServerError)

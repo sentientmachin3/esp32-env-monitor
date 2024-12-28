@@ -56,3 +56,8 @@ go: ## Build the go server
 .PHONY: web
 web: ## Start locally the webapp
 	cd web && pnpm dev
+
+.PHONY: sqlconsole
+sqlconsole: ## Connect to the sqlite db
+	cd provider && sqlite3 provider/data.db
+
