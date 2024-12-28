@@ -81,3 +81,4 @@ provider/.env
 provider/data.db
 provider/build
 provider/main
+data.db
