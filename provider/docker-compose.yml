@@ -8,8 +8,21 @@ services:
       - 0.0.0.0:8080:8080
       - 3080:3080
     environment:
-      - DATABASE_PATH=${DATABASE_PATH}
-    container_name: esp32-env-monitor
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+    container_name: backend
     volumes:
       - ./data.db:/usr/app/data.db
       - ./cmd:/usr/app/cmd/
+
+  db:
+    image: postgres:alpine
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    container_name: db
