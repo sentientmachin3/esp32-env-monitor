@@ -1,6 +1,7 @@
 #include "credentials.h"
 #include "esp_interface.h"
 #include "esp_log.h"
+#include "esp_netif_ip_addr.h"
 #include "esp_wifi.h"
 #include "esp_wifi_types_generic.h"
 #include "locals.h"
@@ -32,6 +33,20 @@ int init_tcp_socket(char *host, int port) {
   return sockfd;
 }
 
+void server_handshake(esp_ip4_addr_t *ip, int sockfd) {
+  ESP_LOGI(TAG, "starting server handshake");
+  char *payload = (char *)malloc(32 * sizeof(char));
+  time_t now;
+  time(&now);
+  sprintf(payload, "%lli," IPSTR ",%s", now, IP2STR(ip), UNIT_NAME);
+  ESP_LOGD(TAG, "server handshake sequence %s", payload);
+  ssize_t send_result = send(sockfd, payload, strlen(payload), 0);
+  if (send_result == -1) {
+    ESP_LOGE(TAG, "error sending handshake data");
+    set_status(ERROR);
+  }
+}
+
 void wifi_event_handler(void *arg, esp_event_base_t event_base,
                         int32_t event_id, void *event_data) {
   ESP_LOGI(TAG, "event_base %s, evt %li", event_base, (long int)event_id);
@@ -51,10 +66,12 @@ void wifi_event_handler(void *arg, esp_event_base_t event_base,
 
   if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
     ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
-    ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
+    esp_ip4_addr_t *ip = &event->ip_info.ip;
+    ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(ip));
     init_sntp();
     set_status(ACTIVE);
     int sockfd = init_tcp_socket(REMOTE_IP, REMOTE_PORT);
+    server_handshake(ip, sockfd);
     start_data_collection(sockfd);
   }
 }
