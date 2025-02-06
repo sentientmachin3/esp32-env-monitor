@@ -33,18 +33,9 @@ int init_tcp_socket(char *host, int port) {
   return sockfd;
 }
 
-void server_handshake(esp_ip4_addr_t *ip, int sockfd) {
+void server_handshake(esp_ip4_addr_t *ip, int sockfd, int unit_id) {
   ESP_LOGI(TAG, "starting server handshake");
-  char *payload = (char *)malloc(32 * sizeof(char));
-  time_t now;
-  time(&now);
-  sprintf(payload, "%lli," IPSTR ",%s", now, IP2STR(ip), UNIT_NAME);
-  ESP_LOGD(TAG, "server handshake sequence %s", payload);
-  ssize_t send_result = send(sockfd, payload, strlen(payload), 0);
-  if (send_result == -1) {
-    ESP_LOGE(TAG, "error sending handshake data");
-    set_status(ERROR);
-  }
+  send_proto_msg(sockfd, prepare_handshake_msg(unit_id));
 }
 
 void wifi_event_handler(void *arg, esp_event_base_t event_base,
@@ -71,7 +62,7 @@ void wifi_event_handler(void *arg, esp_event_base_t event_base,
     init_sntp();
     set_status(ACTIVE);
     int sockfd = init_tcp_socket(REMOTE_IP, REMOTE_PORT);
-    server_handshake(ip, sockfd);
+    server_handshake(ip, sockfd, UNIT_ID);
     start_data_collection(sockfd);
   }
 }

@@ -1,6 +1,13 @@
 #pragma once
 
-typedef enum { CONNECTING, INITIALIZING, ACTIVE, ERROR } Status;
+#include <stdint.h>
+
+typedef struct {
+  int16_t humidity;
+  int16_t temperature;
+} dht_reading;
+
+typedef enum { CONNECTING, INITIALIZING, ACTIVE, ERROR, HANDSHAKE } Status;
 
 static Status global_status = INITIALIZING;
 
