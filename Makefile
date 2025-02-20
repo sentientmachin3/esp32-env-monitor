@@ -58,6 +58,6 @@ web: ## Start locally the webapp
 	cd web && pnpm dev
 
 .PHONY: sqlconsole
-sqlconsole: ## Connect to the postgre db
-	psql -U localhost -d esp32_envmon
+sqlconsole: ## Connect to the postgres db
+	psql -U root -d esp32_envmon -h localhost
 
