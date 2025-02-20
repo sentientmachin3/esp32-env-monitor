@@ -39,7 +39,7 @@ upd: ## Start the compose project
 
 .PHONY: logs
 logs: ## Show logs of the docker compose image
-	docker-compose -f provider/docker-compose.yml logs -f
+	docker-compose -f provider/docker-compose.yml  logs -f api
 
 .PHONY: restart
 restart: ## Restart the compose project
@@ -58,6 +58,6 @@ web: ## Start locally the webapp
 	cd web && pnpm dev
 
 .PHONY: sqlconsole
-sqlconsole: ## Connect to the sqlite db
-	cd provider && sqlite3 provider/data.db
+sqlconsole: ## Connect to the postgre db
+	psql -U localhost -d esp32_envmon
 

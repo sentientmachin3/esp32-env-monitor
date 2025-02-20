@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+const (
+	MSG_TYPE_HANDSHAKE = 0
+	MSG_TYPE_TELEMETRY = 1
+)
+
 func InitTcpSocket(service *Service) {
 	ln, err := net.Listen("tcp4", ":8080")
 	if err != nil {
@@ -29,12 +34,17 @@ func handleUnitConnection(conn net.Conn, service *Service) {
 		if readBytes == 0 {
 			time.Sleep(time.Second)
 			continue
+		} else if buffer[0] == MSG_TYPE_HANDSHAKE {
+			service.UnitConnection(buffer)
+		} else if buffer[0] == MSG_TYPE_TELEMETRY {
+			service.AppendReading(buffer)
+		} else {
+			log.Errorln("unsupported msg type", err)
 		}
 		if err != nil {
 			log.Errorln("unable to read data from socket", err)
 			continue
 		}
-		service.AppendReading(buffer)
 		time.Sleep(time.Second)
 	}
 }

@@ -14,7 +14,6 @@ services:
       - POSTGRES_HOST=${POSTGRES_HOST}
     container_name: backend
     volumes:
-      - ./data.db:/usr/app/data.db
       - ./cmd:/usr/app/cmd/
 
   db:

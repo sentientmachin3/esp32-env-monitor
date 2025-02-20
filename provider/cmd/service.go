@@ -27,7 +27,8 @@ const (
 )
 
 type Service struct {
-	db *sql.DB
+	db              *sql.DB
+	registeredUnits map[int]UnitConnectionData
 }
 
 func (service *Service) FetchRecords(start int, end int) ([]*Record, error) {
@@ -82,6 +83,14 @@ func (service *Service) GetUnitStatus() UnitConnectionData {
 		return UnitConnectionData{Status: Offline, LastUpdate: &lastRecordTimestamp}
 	}
 	return UnitConnectionData{Status: Online, LastUpdate: &lastRecordTimestamp}
+}
+
+func (service *Service) UnitConnection(buffer []byte) {
+	data := string(buffer)
+	values := strings.Split(data, ",")
+	timestamp, _ := strconv.Atoi(values[1])
+	unitId, _ := strconv.Atoi(values[2])
+	service.registeredUnits[unitId] = UnitConnectionData{Status: Online, LastUpdate: &timestamp}
 }
 
 func (service *Service) AppendReading(buffer []byte) {
