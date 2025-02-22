@@ -41,18 +41,16 @@ void server_handshake(esp_ip4_addr_t *ip, int sockfd, int unit_id) {
 void wifi_event_handler(void *arg, esp_event_base_t event_base,
                         int32_t event_id, void *event_data) {
   ESP_LOGI(TAG, "event_base %s, evt %li", event_base, (long int)event_id);
-  if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
+
+  if (event_base == WIFI_EVENT && (event_id == WIFI_EVENT_STA_START ||
+                                   event_id == WIFI_EVENT_HOME_CHANNEL_CHANGE ||
+                                   event_id == WIFI_EVENT_STA_DISCONNECTED)) {
     esp_wifi_connect();
     return;
   }
 
   if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_CONNECTED) {
     ESP_LOGI(TAG, "wifi connected");
-  }
-
-  if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-    ESP_LOGI(TAG, "wifi disconnected");
-    return;
   }
 
   if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
