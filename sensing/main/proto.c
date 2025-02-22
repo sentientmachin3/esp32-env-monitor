@@ -26,8 +26,7 @@ char *prepare_telemetry_msg(dht_reading *data) {
 }
 
 void send_proto_msg(int sockfd, char *payload) {
-  time_t now;
-  time(&now);
+  ESP_LOGD(TAG, "sending protocol message %s", payload);
   ssize_t send_result = send(sockfd, payload, strlen(payload), 0);
   if (send_result == -1) {
     ESP_LOGE(TAG, "error sending socket data");

@@ -85,16 +85,14 @@ func (service *Service) GetUnitStatus() UnitConnectionData {
 	return UnitConnectionData{Status: Online, LastUpdate: &lastRecordTimestamp}
 }
 
-func (service *Service) UnitConnection(buffer []byte) {
-	data := string(buffer)
+func (service *Service) UnitConnection(data string) {
 	values := strings.Split(data, ",")
 	timestamp, _ := strconv.Atoi(values[1])
 	unitId, _ := strconv.Atoi(values[2])
 	service.registeredUnits[unitId] = UnitConnectionData{Status: Online, LastUpdate: &timestamp}
 }
 
-func (service *Service) AppendReading(buffer []byte) {
-	data := string(buffer)
+func (service *Service) AppendReading(data string) {
 	values := strings.Split(data, ",")
 	timestamp, _ := strconv.Atoi(values[0])
 	temperature, _ := strconv.Atoi(values[1])

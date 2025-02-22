@@ -2,6 +2,7 @@ package main
 
 import (
 	"net"
+	"strconv"
 	"time"
 )
 
@@ -23,27 +24,31 @@ func InitTcpSocket(service *Service) {
 			log.Errorln("ln.Accept failed", err)
 		}
 		log.Infoln("new connection received", conn.RemoteAddr())
-		go handleUnitConnection(conn, service)
+		go handleSocketData(conn, service)
 	}
 }
 
-func handleUnitConnection(conn net.Conn, service *Service) {
+func handleSocketData(conn net.Conn, service *Service) {
 	for {
-		buffer := make([]byte, 16)
+		buffer := make([]byte, 32)
 		readBytes, err := conn.Read(buffer)
-		if readBytes == 0 {
-			time.Sleep(time.Second)
-			continue
-		} else if buffer[0] == MSG_TYPE_HANDSHAKE {
-			service.UnitConnection(buffer)
-		} else if buffer[0] == MSG_TYPE_TELEMETRY {
-			service.AppendReading(buffer)
-		} else {
-			log.Errorln("unsupported msg type", err)
-		}
 		if err != nil {
 			log.Errorln("unable to read data from socket", err)
 			continue
+		}
+		if readBytes == 0 {
+			time.Sleep(time.Second)
+			continue
+		}
+		data := string(buffer)
+		msgType, _ := strconv.Atoi(string(data[0]))
+		log.Debugf("received msg %s type %v", data, msgType)
+		if msgType == MSG_TYPE_HANDSHAKE {
+			service.UnitConnection(data)
+		} else if msgType == MSG_TYPE_TELEMETRY {
+			service.AppendReading(data)
+		} else {
+			log.Errorln("unsupported msg type", err)
 		}
 		time.Sleep(time.Second)
 	}

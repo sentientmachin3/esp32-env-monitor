@@ -14,8 +14,9 @@ func main() {
 
 	defer db.Close()
 	var workGroup sync.WaitGroup
-	go tcpHandler(Service{db: db})
-	go httpHandler(Service{db: db})
+	service := Service{db: db, registeredUnits: make(map[int]UnitConnectionData)}
+	go tcpHandler(service)
+	go httpHandler(service)
 	workGroup.Add(2)
 	workGroup.Wait()
 }
