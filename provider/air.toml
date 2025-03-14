@@ -3,6 +3,7 @@ cmd = "go build -o ./build/main cmd/main.go cmd/api.go cmd/datasync.go cmd/servi
 bin = "./build/main"
 include_ext = ["go"]
 exclude_dir = ["build", "vendor"]
+stop_on_error = true
 
 [log]
 level = "debug"
