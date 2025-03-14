@@ -3,8 +3,8 @@ CREATE DATABASE esp32_envmon;
 CREATE TYPE unit_status AS ENUM ('online', 'offline');
 
 CREATE TABLE records (
-    id INTEGER PRIMARY KEY,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id SERIAL PRIMARY KEY ,
+    timestamp INTEGER DEFAULT NULL,
     temperature INTEGER NOT NULL,
     humidity INTEGER NOT NULL
 );
