@@ -14,6 +14,14 @@ type UnitConnectionData struct {
 	LastUpdate *int       `json:"lastUpdate"`
 }
 
+type Unit struct {
+	Id            int        `db:"id"`
+	Name          string     `db:"name"`
+	LastUpdate    int        `db:"last_update"`
+	IpAddr        *string    `db:"ip_addr"`
+	CurrentStatus UnitStatus `db:"unit_status"`
+}
+
 type Record struct {
 	Id          int `db:"id" json:"id"`
 	Timestamp   int `db:"timestamp" json:"timestamp"`
@@ -90,6 +98,16 @@ func (service *Service) UnitConnection(data string) {
 	timestamp, _ := strconv.Atoi(values[1])
 	unitId, _ := strconv.Atoi(values[2])
 	service.registeredUnits[unitId] = UnitConnectionData{Status: Online, LastUpdate: &timestamp}
+	unitRow := service.db.QueryRow("SELECT * FROM unit WHERE id = $1", unitId)
+	var currentUnit Unit
+	err := unitRow.Scan(&currentUnit)
+	if err == sql.ErrNoRows {
+		log.Infoln("new unit detected", unitId)
+        service.db.Exec("INSERT INTO unit VALUES ($1, $2, $3, $4)", "", timestamp, )
+	}
+	if err != nil {
+		log.Errorln("Service.UnitConnection", err)
+	}
 }
 
 func (service *Service) AppendReading(data string) {

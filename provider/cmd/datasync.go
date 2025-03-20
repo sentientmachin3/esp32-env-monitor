@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"net"
 	"strconv"
 	"time"
@@ -32,12 +33,12 @@ func handleSocketData(conn net.Conn, service *Service) {
 	for {
 		buffer := make([]byte, 32)
 		readBytes, err := conn.Read(buffer)
-		if err != nil {
-			log.Errorln("unable to read data from socket", err)
+		if err == io.EOF || readBytes == 0 {
+			time.Sleep(time.Second)
 			continue
 		}
-		if readBytes == 0 {
-			time.Sleep(time.Second)
+		if err != nil {
+			log.Errorln("unable to read data from socket", err)
 			continue
 		}
 		data := string(buffer)
