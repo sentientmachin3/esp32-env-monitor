@@ -1,4 +1,5 @@
 export CGO_ENABLED=1
+DB_NAME="esp32_envmon"
 
 .PHONY: help
 help: ## Shows this help
@@ -59,5 +60,14 @@ web: ## Start locally the webapp
 
 .PHONY: sqlconsole
 sqlconsole: ## Connect to the postgres db
-	psql -U root -d esp32_envmon -h localhost
+	psql -U root -d DB_NAME -h localhost
+
+.PHONY: init-db
+init-db: ## Initialize db
+	psql -U root -d DB_NAME -h localhost < provider/db.init.sql
+
+.PHONE: dump-db
+dump-db: ## Dump the database content
+	pg_dump -U root -h localhost -p 5432 -d DB_NAME -F p -f db.init.sql
+
 

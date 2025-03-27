@@ -24,7 +24,7 @@ type Unit struct {
 
 type Record struct {
 	Id          int `db:"id" json:"id"`
-	Timestamp   int `db:"timestamp" json:"timestamp"`
+	Timestamp   int `db:"ts" json:"timestamp"`
 	Humidity    int `db:"humidity" json:"humidity"`
 	Temperature int `db:"temperature" json:"temperature"`
 }
@@ -39,8 +39,8 @@ type Service struct {
 	registeredUnits map[int]UnitConnectionData
 }
 
-func (service *Service) FetchRecords(start int, end int) ([]*Record, error) {
-	result, err := service.db.Query("SELECT * FROM records WHERE timestamp BETWEEN $1 AND $2", start, end)
+func (service *Service) FetchRecords(start time.Time, end time.Time) ([]*Record, error) {
+	result, err := service.db.Query("SELECT * FROM records WHERE ts BETWEEN $1 AND $2", start, end)
 	if err != nil {
 		log.Errorln("interval records failed", err)
 		return make([]*Record, 0), err
