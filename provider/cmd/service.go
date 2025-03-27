@@ -112,8 +112,10 @@ func (service *Service) UnitConnection(data string) {
 
 func (service *Service) AppendReading(data string) {
 	values := strings.Split(data, ",")
-	timestamp, _ := strconv.Atoi(values[0])
 	temperature, _ := strconv.Atoi(values[1])
 	humidity, _ := strconv.Atoi(values[2])
-	service.db.Exec("INSERT INTO records(timestamp, temperature, humidity) VALUES ($1, $2, $3)", timestamp, temperature, humidity)
+    _, err := service.db.Exec("INSERT INTO records(ts, temperature, humidity) VALUES ($1, $2, $3)", time.Now(), temperature, humidity)
+    if err != nil {
+        log.Errorln("Service.AppendReading", err)
+    }
 }
