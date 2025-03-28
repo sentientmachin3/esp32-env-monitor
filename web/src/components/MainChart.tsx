@@ -1,8 +1,10 @@
 "use client"
 
-import { Record } from "@/types"
+import { GraphInterval } from "@/enums"
+import { ParsedRecord } from "@/types"
 import { DATETIME_FORMAT, HUMIDITY_SUFFIX, TEMPERATURE_SUFFIX } from "@/utils"
 import moment from "moment"
+import { useMemo } from "react"
 import {
   CartesianGrid,
   Line,
@@ -16,12 +18,25 @@ import {
 export function MainChart({
   stats,
   height,
+  interval,
 }: {
-  stats: Record[]
+  stats: ParsedRecord[]
   height: number
+  interval: GraphInterval
 }) {
-  const timeFormatter = (time: number) =>
-    moment.unix(time).format(DATETIME_FORMAT)
+  const timeFormatter = (time: number) => {
+    return moment.unix(time).format(DATETIME_FORMAT)
+  }
+  const ticks = useMemo(() => {
+    const result: number[] = []
+    let nextInstant = moment().subtract(1, "day").startOf("hour")
+    result.push(nextInstant.unix())
+    while (nextInstant.isBefore(moment())) {
+      nextInstant = nextInstant.clone().add(30, "minutes")
+      result.push(nextInstant.unix())
+    }
+    return result
+  }, [interval])
 
   return (
     <div>
@@ -37,6 +52,7 @@ export function MainChart({
             tickFormatter={timeFormatter}
             type="number"
             domain={["auto", "auto"]}
+            ticks={ticks}
           />
           <YAxis domain={[0, 50]} />
           <Tooltip
@@ -56,6 +72,7 @@ export function MainChart({
             stroke="#82ca9d"
             activeDot={{ r: 8 }}
             dot={false}
+            isAnimationActive={false}
           />
         </LineChart>
       </ResponsiveContainer>
@@ -72,6 +89,7 @@ export function MainChart({
             tickFormatter={timeFormatter}
             type="number"
             domain={["auto", "auto"]}
+            ticks={ticks}
           />
           <Tooltip
             wrapperStyle={{ outline: "none" }}
@@ -88,6 +106,7 @@ export function MainChart({
             stroke="#8884d8"
             activeDot={{ r: 8 }}
             dot={false}
+            isAnimationActive={false}
           />
         </LineChart>
       </ResponsiveContainer>
