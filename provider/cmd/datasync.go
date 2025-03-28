@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"net"
 	"strconv"
 	"time"
@@ -32,15 +33,15 @@ func handleSocketData(conn net.Conn, service *Service) {
 	for {
 		buffer := make([]byte, 32)
 		readBytes, err := conn.Read(buffer)
+		if err == io.EOF || readBytes == 0 {
+			time.Sleep(time.Second)
+			continue
+		}
 		if err != nil {
 			log.Errorln("unable to read data from socket", err)
 			continue
 		}
-		if readBytes == 0 {
-			time.Sleep(time.Second)
-			continue
-		}
-		data := string(buffer)
+		data := string(buffer)[:readBytes]
 		msgType, _ := strconv.Atoi(string(data[0]))
 		log.Debugf("received msg %s type %v", data, msgType)
 		if msgType == MSG_TYPE_HANDSHAKE {

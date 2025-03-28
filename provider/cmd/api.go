@@ -23,7 +23,7 @@ func handleRecords(service *Service) gin.HandlerFunc {
 			intervalStart, _ := time.Parse(time.RFC3339, query.Get("start"))
 			intervalEnd, _ := time.Parse(time.RFC3339, query.Get("end"))
 			log.Debugf("requested logs from %v to %v", intervalStart, intervalEnd)
-			records, err := service.FetchRecords(int(intervalStart.UTC().Unix()), int(intervalEnd.UTC().Unix()))
+			records, err := service.FetchRecords(intervalStart, intervalEnd)
 			jsonRows = records
 			if err != nil {
 				context.Status(http.StatusInternalServerError)

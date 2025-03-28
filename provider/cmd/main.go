@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"sync"
 
 	"github.com/gin-contrib/cors"
@@ -10,7 +11,11 @@ import (
 
 func main() {
 	InitLogger()
-	db := InitDb()
+	user := os.Getenv("POSTGRES_USER")
+	dbName := os.Getenv("POSTGRES_DB")
+	password := os.Getenv("POSTGRES_PASSWORD")
+	host := os.Getenv("POSTGRES_HOST")
+	db := InitDb(host, user, password, dbName)
 
 	defer db.Close()
 	var workGroup sync.WaitGroup

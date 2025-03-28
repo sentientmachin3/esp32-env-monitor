@@ -13,7 +13,9 @@
     "@nextui-org/card": "^2.2.8",
     "@nextui-org/spinner": "^2.2.5",
     "axios": "^1.7.9",
+    "d3-scale": "^4.0.2",
     "moment": "^2.30.1",
+    "moment-timezone": "^0.5.48",
     "next": "15.1.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -21,6 +23,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/d3-scale": "^4.0.9",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

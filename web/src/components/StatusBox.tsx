@@ -9,15 +9,19 @@ import moment from "moment"
 export function StatusBox({
   unitStatus,
 }: {
-  unitStatus: UnitConnectionStatus
+  unitStatus: UnitConnectionStatus | undefined
 }) {
   const unitStatusStyles = () => {
+    if (unitStatus === undefined) {
+      return "border-yellw-600 bg-yellow-600"
+    }
     if (unitStatus.status === UnitStatus.OFFLINE) {
       return "border-red-600 bg-red-600"
     } else {
       return "border-lime-500 bg-lime-500"
     }
   }
+
   return (
     <Card
       className={`min-w-40  ${unitStatusStyles()} text-white rounded-md border-2 px-2 py-2`}
@@ -27,7 +31,7 @@ export function StatusBox({
           {"Last update"}
         </p>
         <small className="font-semibold text-lg">
-          {unitStatus.lastUpdate
+          {unitStatus?.lastUpdate
             ? moment.unix(unitStatus.lastUpdate).format(DATETIME_FORMAT)
             : "--/--/-- --:--:--"}
         </small>
@@ -35,7 +39,7 @@ export function StatusBox({
       <CardBody
         className={`${unitStatusStyles()} p-2 font-bold text-3xl text-center`}
       >
-        {unitStatus.status}
+        {unitStatus?.status ?? "UNKNOWN"}
       </CardBody>
     </Card>
   )

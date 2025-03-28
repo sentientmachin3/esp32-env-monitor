@@ -1,3 +1,5 @@
+"use client"
+
 import { DATETIME_FORMAT } from "@/utils"
 import { Card, CardBody, CardHeader } from "@nextui-org/card"
 import { Moment } from "moment"

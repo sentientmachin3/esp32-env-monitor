@@ -8,7 +8,6 @@
 #include "lwip/sockets.h"
 #include "nvs_flash.h"
 #include "sensing.c"
-#include "sntp.c"
 #include "state.h"
 
 int init_tcp_socket(char *host, int port) {
@@ -41,7 +40,10 @@ void server_handshake(esp_ip4_addr_t *ip, int sockfd, int unit_id) {
 void wifi_event_handler(void *arg, esp_event_base_t event_base,
                         int32_t event_id, void *event_data) {
   ESP_LOGI(TAG, "event_base %s, evt %li", event_base, (long int)event_id);
-  if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
+
+  if (event_base == WIFI_EVENT && (event_id == WIFI_EVENT_STA_START ||
+                                   event_id == WIFI_EVENT_HOME_CHANNEL_CHANGE ||
+                                   event_id == WIFI_EVENT_STA_DISCONNECTED)) {
     esp_wifi_connect();
     return;
   }
@@ -50,16 +52,10 @@ void wifi_event_handler(void *arg, esp_event_base_t event_base,
     ESP_LOGI(TAG, "wifi connected");
   }
 
-  if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-    ESP_LOGI(TAG, "wifi disconnected");
-    return;
-  }
-
   if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
     ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
     esp_ip4_addr_t *ip = &event->ip_info.ip;
     ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(ip));
-    init_sntp();
     set_status(ACTIVE);
     int sockfd = init_tcp_socket(REMOTE_IP, REMOTE_PORT);
     server_handshake(ip, sockfd, UNIT_ID);
