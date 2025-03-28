@@ -6,7 +6,7 @@ import { Record } from "@/types"
 import { httpClient, HUMIDITY_SUFFIX, TEMPERATURE_SUFFIX } from "@/utils"
 import { Spinner } from "@nextui-org/spinner"
 import { Button } from "@nextui-org/button"
-import moment from "moment"
+import moment from "moment-timezone"
 import { useEffect, useState } from "react"
 import { StatusBox } from "@/components/StatusBox"
 import { UnitConnectionStatus } from "@/types/UnitConnectionStatus"
@@ -61,13 +61,13 @@ export default function Home() {
         <ValueBox
           label={"Temperature"}
           value={lastStat(records)?.temperature}
-          moment={moment.unix(records[records.length - 1]?.timestamp)}
+          moment={moment(records[records.length - 1]?.timestamp)}
           suffix={TEMPERATURE_SUFFIX}
         />
         <ValueBox
           label={"Humidity"}
           value={lastStat(records)?.humidity}
-          moment={moment.unix(records[records.length - 1]?.timestamp)}
+          moment={moment(records[records.length - 1]?.timestamp)}
           suffix={HUMIDITY_SUFFIX}
         />
         <Button

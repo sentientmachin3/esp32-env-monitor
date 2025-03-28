@@ -4,6 +4,5 @@
 #define REMOTE_IP "192.168.1.7"
 #define REMOTE_PORT 8080
 #define UNIT_ID 1
-#define SNTP_SERVER_NAME "europe.pool.ntp.org"
 #define TAG "main"
 #define DHT_SENSING_PERIOD_S 5

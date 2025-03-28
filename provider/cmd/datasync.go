@@ -41,7 +41,7 @@ func handleSocketData(conn net.Conn, service *Service) {
 			log.Errorln("unable to read data from socket", err)
 			continue
 		}
-		data := string(buffer)
+		data := string(buffer)[:readBytes]
 		msgType, _ := strconv.Atoi(string(data[0]))
 		log.Debugf("received msg %s type %v", data, msgType)
 		if msgType == MSG_TYPE_HANDSHAKE {
