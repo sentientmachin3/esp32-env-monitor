@@ -21,8 +21,8 @@ flash: ## Flash the esp app to /dev/ttyUSB0
 serial: ## Open the serial console
 	idf.py -C sensing monitor
 
-.PHONY: app
-app: ## Builds, flashes and open the serial for the esp app
+.PHONY: esp
+esp: ## Builds, flashes and open the serial for the esp app
 	make build flash serial
 
 .PHONY: setup
@@ -30,8 +30,8 @@ setup: ## Full build of the esp project
 	idf.py -C sensing build
 	idf.py -C sensing -p /dev/ttyUSB0 flash
 
-.PHONY: compose-build
-compose-build: ## Build the backend docker compose
+.PHONY: compose
+compose: ## Build the backend docker compose
 	cd provider && docker-compose build
 
 .PHONY: upd
@@ -60,14 +60,14 @@ web: ## Start locally the webapp
 
 .PHONY: sqlconsole
 sqlconsole: ## Connect to the postgres db
-	psql -U root -d DB_NAME -h localhost
+	psql -U root -d $(DB_NAME) -h localhost
 
 .PHONY: init-db
 init-db: ## Initialize db
-	psql -U root -d DB_NAME -h localhost < "provider/db.init.sql"
+	psql -U root -d $(DB_NAME) -h localhost < "provider/db.init.sql"
 
 .PHONE: dump-db
 dump-db: ## Dump the database content
-	pg_dump -U root -h localhost -p 5432 -d DB_NAME -F p -f db.init.sql
+	pg_dump -U root -h localhost -p 5432 -d $(DB_NAME) -F p -f db.init.sql
 
 

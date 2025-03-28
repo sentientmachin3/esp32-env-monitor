@@ -80,6 +80,5 @@ provider/.env
 provider/data.db
 provider/build
 provider/main
-data.db
 .env
 sensing/main/locals.h
