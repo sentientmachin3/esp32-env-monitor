@@ -32,23 +32,27 @@ setup: ## Full build of the esp project
 
 .PHONY: compose
 compose: ## Build the backend docker compose
-	cd provider && docker-compose build
+	docker-compose build
 
 .PHONY: upd
 upd: ## Start the compose project
-	cd provider && docker-compose up -d
+	docker-compose up -d
 
 .PHONY: logs
 logs: ## Show logs of the docker compose image
-	docker-compose -f provider/docker-compose.yml  logs -f api
+	docker-compose -f docker-compose.yml  logs -f api
+
+.PHONY: web-logs
+web-logs: ## Show logs of the docker compose image
+	docker-compose -f docker-compose.yml  logs -f web
 
 .PHONY: restart
 restart: ## Restart the compose project
-	docker-compose -f provider/docker-compose.yml restart
+	docker-compose -f docker-compose.yml restart
 
 .PHONY: stop
 stop: ## Restart the compose project
-	docker-compose -f provider/docker-compose.yml stop
+	docker-compose -f docker-compose.yml stop
 
 .PHONY: go
 go: ## Build the go server
