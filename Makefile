@@ -68,7 +68,7 @@ sqlconsole: ## Connect to the postgres db
 
 .PHONY: init-db
 init-db: ## Initialize db
-	psql -U root -d $(DB_NAME) -h localhost < "provider/db.init.sql"
+	psql -U root -d $(DB_NAME) -h localhost < db.init.sql
 
 .PHONE: dump-db
 dump-db: ## Dump the database content

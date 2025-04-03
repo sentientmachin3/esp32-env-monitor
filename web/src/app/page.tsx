@@ -1,16 +1,21 @@
 "use client"
 
 import { MainChart } from "@/components/MainChart"
+import { StatusBox } from "@/components/StatusBox"
 import { ValueBox } from "@/components/ValueBox"
+import { GraphInterval } from "@/enums"
 import { ParsedRecord, Record } from "@/types"
-import { httpClient, HUMIDITY_SUFFIX, TEMPERATURE_SUFFIX } from "@/utils"
-import { Spinner } from "@nextui-org/spinner"
+import { UnitConnectionStatus } from "@/types/UnitConnectionStatus"
+import {
+  DATETIME_FORMAT,
+  httpClient,
+  HUMIDITY_SUFFIX,
+  TEMPERATURE_SUFFIX,
+} from "@/utils"
 import { Button } from "@nextui-org/button"
+import { Spinner } from "@nextui-org/spinner"
 import moment from "moment-timezone"
 import { useEffect, useState } from "react"
-import { StatusBox } from "@/components/StatusBox"
-import { UnitConnectionStatus } from "@/types/UnitConnectionStatus"
-import { GraphInterval } from "@/enums"
 
 export default function Home() {
   const [records, setRecords] = useState<ParsedRecord[]>([])
@@ -24,6 +29,15 @@ export default function Home() {
     httpClient.get<UnitConnectionStatus>("/status").then((res) => {
       setUnitStatus(res.data)
     })
+  }
+
+  const timeToRender = () => {
+    const instant = records[records.length - 1]?.timestamp
+    if (instant === undefined) {
+      return "--/--/-- --:--:--"
+    } else {
+      return moment.unix(instant).format(DATETIME_FORMAT)
+    }
   }
 
   const refreshData = () => {
@@ -70,13 +84,13 @@ export default function Home() {
         <ValueBox
           label={"Temperature"}
           value={lastStat(records)?.temperature}
-          moment={moment(records[records.length - 1]?.timestamp)}
+          time={timeToRender()}
           suffix={TEMPERATURE_SUFFIX}
         />
         <ValueBox
           label={"Humidity"}
           value={lastStat(records)?.humidity}
-          moment={moment(records[records.length - 1]?.timestamp)}
+          time={timeToRender()}
           suffix={HUMIDITY_SUFFIX}
         />
         <Button
