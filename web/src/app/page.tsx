@@ -1,8 +1,6 @@
 "use client"
 
-import { MainChart } from "@/components/MainChart"
-import { StatusBox } from "@/components/StatusBox"
-import { ValueBox } from "@/components/ValueBox"
+import { IntervalSelector, MainChart, StatusBox, ValueBox } from "@/components"
 import { GraphInterval } from "@/enums"
 import { ParsedRecord, Record } from "@/types"
 import { UnitConnectionStatus } from "@/types/UnitConnectionStatus"
@@ -10,12 +8,15 @@ import {
   DATETIME_FORMAT,
   httpClient,
   HUMIDITY_SUFFIX,
+  momentByInterval,
   TEMPERATURE_SUFFIX,
 } from "@/utils"
 import { Button } from "@nextui-org/button"
 import { Spinner } from "@nextui-org/spinner"
 import moment from "moment-timezone"
 import { useEffect, useState } from "react"
+
+const REFRESH_PERIOD_MS = 10_000
 
 export default function Home() {
   const [records, setRecords] = useState<ParsedRecord[]>([])
@@ -24,6 +25,7 @@ export default function Home() {
   >()
   const [loading, setLoading] = useState(false)
   const [height, setHeight] = useState(920)
+  const [timeframe, setTimeFrame] = useState(GraphInterval.HALF_HOUR)
 
   const refreshUnitStatus = () => {
     httpClient.get<UnitConnectionStatus>("/status").then((res) => {
@@ -40,14 +42,14 @@ export default function Home() {
     }
   }
 
-  const refreshData = () => {
+  const refreshData = (interval: GraphInterval) => {
     setLoading(true)
     const now = moment()
-    const oneDayBefore = moment().subtract(1, "day")
+    const intervalBegin = momentByInterval(interval)
     httpClient
       .get<
         Record[]
-      >("/records", { params: { start: oneDayBefore.toISOString(), end: now.toISOString() } })
+      >("/records", { params: { start: intervalBegin.toISOString(), end: now.toISOString() } })
       .then((res) => {
         const incomingStats: ParsedRecord[] = (res.data as Record[])
           .filter((s) => s.humidity !== 0 || s.temperature !== 0)
@@ -68,18 +70,19 @@ export default function Home() {
   ) => stats[stats.length - 1]
 
   useEffect(() => {
-    refreshData()
+    refreshData(timeframe)
     refreshUnitStatus()
-    setInterval(() => refreshData(), 10_000)
     setHeight(window.innerHeight)
-  }, [])
+    const refreshInterval = setInterval(
+      () => refreshData(timeframe),
+      REFRESH_PERIOD_MS
+    )
+    return () => clearInterval(refreshInterval)
+  }, [timeframe])
 
   return (
     <div className="flex px-8 py-6 h-full">
-      <div
-        className="flex flex-col max-w-15 gap-4"
-        suppressHydrationWarning={true}
-      >
+      <div className="flex flex-col max-w-15 gap-4">
         <StatusBox unitStatus={unitStatus} />
         <ValueBox
           label={"Temperature"}
@@ -95,20 +98,30 @@ export default function Home() {
         />
         <Button
           className="flex bg-black text-white font-semibold uppercase justify-center rounded-md px-2 py-2 outline-none"
-          onPress={() => refreshData()}
+          onPress={() => refreshData(timeframe)}
         >
           {loading ? <Spinner color="white" label={"loading..."} /> : "Refresh"}
         </Button>
+        <IntervalSelector
+          itemStyle={
+            "bg-black text-white font-semibold uppercase justify-center rounded-md px-2 py-2 outline-none"
+          }
+          containerStyle={"py-2 flex flex-col gap-y-2"}
+          onSelect={setTimeFrame}
+          intervals={[
+            GraphInterval.ONE_DAY,
+            GraphInterval.ONE_WEEK,
+            GraphInterval.ONE_MONTH,
+            GraphInterval.TWO_WEEKS,
+            GraphInterval.HALF_HOUR,
+          ]}
+        />
       </div>
-      {loading || records.length === 0 ? (
+      {records.length === 0 ? (
         <Spinner />
       ) : (
         <div className="flex-1">
-          <MainChart
-            stats={records}
-            height={height}
-            interval={GraphInterval.ONE_DAY}
-          />
+          <MainChart stats={records} height={height} interval={timeframe} />
         </div>
       )}
     </div>

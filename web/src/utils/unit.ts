@@ -4,7 +4,7 @@ import moment from "moment"
 
 export const unitStatus = (stat: Record) => {
   const offlineThreshold = moment.duration(1, "minute")
-  const lastUpdate = moment.unix(stat.timestamp)
+  const lastUpdate = moment(stat.timestamp)
   return moment().subtract(offlineThreshold).isBefore(lastUpdate)
     ? UnitStatus.ONLINE
     : UnitStatus.OFFLINE

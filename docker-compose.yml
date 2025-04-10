@@ -15,6 +15,9 @@ services:
     container_name: backend
     volumes:
       - ./provider/cmd:/usr/app/cmd/
+    depends_on:
+      - db
+
 
   db:
     image: postgres:alpine
@@ -36,3 +39,5 @@ services:
     volumes:
       - ./web/src:/app/src/
       - ./web/public:/app/public/
+    depends_on:
+      - api

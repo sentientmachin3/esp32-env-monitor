@@ -24,9 +24,9 @@ export function MainChart({
   height: number
   interval: GraphInterval
 }) {
-  const timeFormatter = (time: number) => {
-    return moment.unix(time).format(DATETIME_FORMAT)
-  }
+  const timeFormatter = (time: number) =>
+    moment.unix(time).format(DATETIME_FORMAT)
+
   const ticks = useMemo(() => {
     const result: number[] = []
     let nextInstant = moment().subtract(1, "day").startOf("hour")

@@ -38,6 +38,10 @@ compose: ## Build the backend docker compose
 upd: ## Start the compose project
 	docker-compose up -d
 
+.PHONY: tsc
+tsc: ## Start the compose project
+	cd web && npx tsc && cd ..
+
 .PHONY: logs
 logs: ## Show logs of the docker compose image
 	docker-compose -f docker-compose.yml  logs -f api
@@ -51,16 +55,16 @@ restart: ## Restart the compose project
 	docker-compose -f docker-compose.yml restart
 
 .PHONY: stop
-stop: ## Restart the compose project
+stop: ## Stop all containers
 	docker-compose -f docker-compose.yml stop
+
+.PHONY: down
+down: ## Drop all containers
+	docker-compose -f docker-compose.yml down
 
 .PHONY: go
 go: ## Build the go server
 	cd provider && go build -o build/main cmd/main.go cmd/datasync.go cmd/api.go cmd/service.go cmd/logging.go cmd/db.go
-
-.PHONY: web
-web: ## Start locally the webapp
-	cd web && pnpm dev
 
 .PHONY: sqlconsole
 sqlconsole: ## Connect to the postgres db
