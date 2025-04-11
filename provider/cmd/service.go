@@ -50,7 +50,7 @@ type Service struct {
 }
 
 func (service *Service) FetchRecords(start time.Time, end time.Time, interval RecordInterval) ([]*Record, error) {
-	result, err := service.db.Query("SELECT * FROM records WHERE ts BETWEEN $1 AND $2", start, end)
+	result, err := service.db.Query("SELECT id, ts, temperature, humidity FROM records WHERE ts BETWEEN $1 AND $2", start, end)
 	if err != nil {
 		log.Errorln("interval records failed", err)
 		return make([]*Record, 0), err
@@ -58,19 +58,19 @@ func (service *Service) FetchRecords(start time.Time, end time.Time, interval Re
 	var records []*Record = make([]*Record, 0)
 	for result.Next() {
 		var record *Record = &Record{Id: 0, Timestamp: time.Now(), Humidity: 0, Temperature: 0}
-		result.Scan(&record.Id, &record.Humidity, &record.Temperature, &record.Timestamp)
+		result.Scan(&record.Id, &record.Timestamp, &record.Temperature, &record.Humidity)
+		log.Debugf("%+v", record)
 		records = append(records, record)
 	}
-
 	return service.condensate(records, interval), nil
 }
 
 func (service *Service) LastKnownRecord() *Record {
-	result, _ := service.db.Query("SELECT * FROM records ORDER BY ts DESC LIMIT 1;")
+	result, _ := service.db.Query("SELECT id, ts, humidity, temperature FROM records ORDER BY ts DESC LIMIT 1;")
 	if result.Next() {
-		var record Record = Record{Id: 0, Timestamp: time.Now(), Humidity: 0, Temperature: 0}
+		var record *Record = &Record{Id: 0, Timestamp: time.Now(), Humidity: 0, Temperature: 0}
 		result.Scan(record.Id, record.Timestamp, record.Humidity, record.Temperature)
-		return &record
+		return record
 	}
 	return nil
 }
