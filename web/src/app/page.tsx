@@ -2,7 +2,7 @@
 
 import { IntervalSelector, MainChart, StatusBox, ValueBox } from "@/components"
 import { GraphInterval } from "@/enums"
-import { ParsedRecord, Record } from "@/types"
+import { TimeRecord } from "@/types"
 import { UnitConnectionStatus } from "@/types/UnitConnectionStatus"
 import {
   DATETIME_FORMAT,
@@ -19,7 +19,7 @@ import { useEffect, useState } from "react"
 const REFRESH_PERIOD_MS = 10_000
 
 export default function Home() {
-  const [records, setRecords] = useState<ParsedRecord[]>([])
+  const [records, setRecords] = useState<TimeRecord[]>([])
   const [unitStatus, setUnitStatus] = useState<
     UnitConnectionStatus | undefined
   >()
@@ -38,35 +38,28 @@ export default function Home() {
     if (instant === undefined) {
       return "--/--/-- --:--:--"
     } else {
-      return moment.unix(instant).format(DATETIME_FORMAT)
+      return moment(instant).format(DATETIME_FORMAT)
     }
   }
 
   const refreshData = (interval: GraphInterval) => {
     setLoading(true)
-    const now = moment()
-    const intervalBegin = momentByInterval(interval)
+    const intervalQuery = momentByInterval(interval)
     httpClient
-      .get<
-        Record[]
-      >("/records", { params: { start: intervalBegin.toISOString(), end: now.toISOString() } })
+      .get<TimeRecord[]>("/records", { params: { interval: intervalQuery } })
       .then((res) => {
-        const incomingStats: ParsedRecord[] = (res.data as Record[])
+        const incomingStats: TimeRecord[] = (res.data as TimeRecord[])
           .filter((s) => s.humidity !== 0 || s.temperature !== 0)
           .sort((s1, s2) =>
             moment(s1.timestamp).isBefore(moment(s2.timestamp)) ? -1 : 1
           )
-          .map((s) => ({
-            ...s,
-            timestamp: moment(s.timestamp).unix(),
-          }))
         setRecords(incomingStats)
         setLoading(false)
       })
   }
 
-  const lastStat: (stats: ParsedRecord[]) => ParsedRecord | undefined = (
-    stats: ParsedRecord[]
+  const lastStat: (stats: TimeRecord[]) => TimeRecord | undefined = (
+    stats: TimeRecord[]
   ) => stats[stats.length - 1]
 
   useEffect(() => {
@@ -103,6 +96,7 @@ export default function Home() {
           {loading ? <Spinner color="white" label={"loading..."} /> : "Refresh"}
         </Button>
         <IntervalSelector
+          selected={timeframe}
           itemStyle={
             "bg-black text-white font-semibold uppercase justify-center rounded-md px-2 py-2 outline-none"
           }
@@ -121,7 +115,7 @@ export default function Home() {
         <Spinner />
       ) : (
         <div className="flex-1">
-          <MainChart stats={records} height={height} interval={timeframe} />
+          <MainChart stats={records} height={height} />
         </div>
       )}
     </div>

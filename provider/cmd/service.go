@@ -59,7 +59,6 @@ func (service *Service) FetchRecords(start time.Time, end time.Time, interval Re
 	for result.Next() {
 		var record *Record = &Record{Id: 0, Timestamp: time.Now(), Humidity: 0, Temperature: 0}
 		result.Scan(&record.Id, &record.Timestamp, &record.Temperature, &record.Humidity)
-		log.Debugf("%+v", record)
 		records = append(records, record)
 	}
 	return service.condensate(records, interval), nil
@@ -134,7 +133,7 @@ func (service *Service) condensate(records []*Record, interval RecordInterval) [
 	case HalfHour:
 		granularity, _ = time.ParseDuration("1m")
 	case TwoWeeks:
-		granularity, _ = time.ParseDuration("1h")
+		granularity, _ = time.ParseDuration("6h")
 	}
 	filtered = append(filtered, records[0])
 	for _, r := range records {

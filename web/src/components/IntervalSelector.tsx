@@ -12,21 +12,26 @@ export function IntervalSelector({
   itemStyle,
   intervals,
   onSelect,
+  selected,
 }: {
   containerStyle: string
   itemStyle: string
   intervals: GraphInterval[]
   onSelect: (interval: GraphInterval) => void
+  selected: GraphInterval
 }) {
   return (
     <div className={containerStyle}>
       {intervals.map((i) => (
-        <div
-          key={`interval_${i}`}
-          className={`${itemStyle} cursor-pointer`}
-          onClick={() => onSelect(i)}
-        >
-          {INTERVAL_TRANSLATIONS[i]}
+        <div key={`interval_${i}`}>
+          <input
+            type={"radio"}
+            className={itemStyle}
+            value={i}
+            onChange={() => onSelect(i)}
+            checked={selected === i}
+          />
+          <label>{INTERVAL_TRANSLATIONS[i]}</label>
         </div>
       ))}
     </div>
