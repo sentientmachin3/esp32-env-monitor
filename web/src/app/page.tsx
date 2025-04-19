@@ -115,7 +115,7 @@ export default function Home() {
         <Spinner />
       ) : (
         <div className="flex-1">
-          <MainChart stats={records} height={height} />
+          <MainChart stats={records} height={height * 0.9} />
         </div>
       )}
     </div>

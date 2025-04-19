@@ -25,6 +25,14 @@ Chart.register(
   TimeScale
 )
 
+const commonOptions = {
+  animation: {
+    duration: 0,
+  },
+  responsive: true,
+  maintainAspectRatio: false,
+}
+
 export function MainChart({
   stats,
   height,
@@ -48,56 +56,58 @@ export function MainChart({
 
   return (
     <div>
-      <Line
-        height={height / 2}
-        title={`Temperature (${TEMPERATURE_SUFFIX})`}
-        options={{
-          responsive: false,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              type: "time",
-              ticks: {
-                source: "data",
-                callback: (value) =>
-                  moment(Number(value)).format(DATETIME_FORMAT),
+      <div className="relative">
+        <Line
+          height={height / 2}
+          title={`Temperature (${TEMPERATURE_SUFFIX})`}
+          options={{
+            ...commonOptions,
+            scales: {
+              x: {
+                type: "time",
+                ticks: {
+                  source: "data",
+                  callback: (value) =>
+                    moment(Number(value)).format(DATETIME_FORMAT),
+                },
+              },
+              y: {
+                min: 0,
+                max: 50,
               },
             },
-            y: {
-              min: 0,
-              max: 50,
-            },
-          },
-        }}
-        data={{
-          datasets: [{ label: "Temperature", data: temperatures }],
-        }}
-      ></Line>
-      <Line
-        height={height / 2}
-        title={`Humidity (${HUMIDITY_SUFFIX})`}
-        options={{
-          responsive: false,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              type: "time",
-              ticks: {
-                source: "data",
-                callback: (value) =>
-                  moment(Number(value)).format(DATETIME_FORMAT),
+          }}
+          data={{
+            datasets: [{ label: "Temperature", data: temperatures }],
+          }}
+        ></Line>
+      </div>
+      <div>
+        <Line
+          height={height / 2}
+          title={`Humidity (${HUMIDITY_SUFFIX})`}
+          options={{
+            ...commonOptions,
+            scales: {
+              x: {
+                type: "time",
+                ticks: {
+                  source: "data",
+                  callback: (value) =>
+                    moment(Number(value)).format(DATETIME_FORMAT),
+                },
+              },
+              y: {
+                min: 20,
+                max: 70,
               },
             },
-            y: {
-              min: 20,
-              max: 70,
-            },
-          },
-        }}
-        data={{
-          datasets: [{ label: "Humidity", data: humidities }],
-        }}
-      ></Line>
+          }}
+          data={{
+            datasets: [{ label: "Humidity", data: humidities }],
+          }}
+        ></Line>
+      </div>
     </div>
   )
 }
