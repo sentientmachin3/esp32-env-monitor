@@ -1,22 +1,4 @@
 import { GraphInterval } from "@/enums"
-import moment from "moment"
-
-export function samplingInterval(interval: GraphInterval): moment.Duration {
-  switch (interval) {
-    case GraphInterval.ONE_MONTH:
-      return moment.duration(1, "day")
-    case GraphInterval.ONE_WEEK:
-      return moment.duration(1, "hour")
-    case GraphInterval.TWO_WEEKS:
-      return moment.duration(6, "hours")
-    case GraphInterval.ONE_DAY:
-      return moment.duration(30, "minutes")
-    case GraphInterval.HALF_HOUR:
-      return moment.duration(1, "minute")
-    default:
-      return moment.duration(1, "minute")
-  }
-}
 
 export function momentByInterval(interval: GraphInterval): string {
   switch (interval) {

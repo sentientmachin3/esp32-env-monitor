@@ -74,8 +74,12 @@ sqlconsole: ## Connect to the postgres db
 init-db: ## Initialize db
 	psql -U root -d $(DB_NAME) -h localhost < db.init.sql
 
-.PHONE: dump-db
+.PHONY: dump-db
 dump-db: ## Dump the database content
 	pg_dump -U root -h localhost -p 5432 -d $(DB_NAME) -F p -f db.init.sql
+
+.PHONY: lint
+lint: ## Run linter on the codebase
+	cd web && pnpm exec eslint ./src && cd ..
 
 
