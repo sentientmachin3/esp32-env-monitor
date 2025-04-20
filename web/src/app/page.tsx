@@ -1,12 +1,12 @@
 "use client"
 
-import { IntervalSelector, MainChart, StatusBox, ValueBox } from "@/components"
+import { IntervalSelector, StatusBox, ValueBox, DataView } from "@/components"
 import { GraphInterval } from "@/enums"
 import { useRecords, useUnitStatus } from "@/hooks"
 import { TimeRecord } from "@/types"
 import { DATETIME_FORMAT, HUMIDITY_SUFFIX, TEMPERATURE_SUFFIX } from "@/utils"
 import { Button } from "@nextui-org/button"
-import { Spinner } from "@nextui-org/spinner"
+import { Spinner } from "@heroui/spinner"
 import moment from "moment-timezone"
 import { useEffect, useState } from "react"
 
@@ -43,10 +43,10 @@ export default function Home() {
     refreshRecords()
     refreshStatus()
     setHeight(window.innerHeight)
-    const refreshInterval = setInterval(
-      () => refreshRecords(),
-      REFRESH_PERIOD_MS
-    )
+    const refreshInterval = setInterval(() => {
+      refreshRecords()
+      refreshStatus()
+    }, REFRESH_PERIOD_MS)
     return () => clearInterval(refreshInterval)
   }, [timeframe])
 
@@ -94,13 +94,7 @@ export default function Home() {
           ]}
         />
       </div>
-      {records === undefined || records.length === 0 ? (
-        <Spinner />
-      ) : (
-        <div className="flex-1">
-          <MainChart stats={records} height={height * 0.9} />
-        </div>
-      )}
+      <DataView records={records} height={height} />
     </div>
   )
 }
