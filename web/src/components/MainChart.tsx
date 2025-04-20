@@ -84,6 +84,11 @@ export function MainChart({
               },
             },
             plugins: {
+              title: {
+                display: true,
+                text: `Temperature (${TEMPERATURE_SUFFIX})`,
+                font: { size: 16 },
+              },
               annotation: {
                 annotations: [
                   {
@@ -135,6 +140,11 @@ export function MainChart({
               },
             },
             plugins: {
+              title: {
+                display: true,
+                text: `Humidity (${HUMIDITY_SUFFIX})`,
+                font: { size: 16 },
+              },
               annotation: {
                 annotations: [
                   {
