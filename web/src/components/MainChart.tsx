@@ -1,115 +1,113 @@
 "use client"
 
-import { GraphInterval } from "@/enums"
-import { ParsedRecord } from "@/types"
+import { TimeRecord } from "@/types"
 import { DATETIME_FORMAT, HUMIDITY_SUFFIX, TEMPERATURE_SUFFIX } from "@/utils"
+import {
+  CategoryScale,
+  Chart,
+  LinearScale,
+  LineElement,
+  PointElement,
+  TimeScale,
+  Title,
+} from "chart.js"
+import "chartjs-adapter-moment"
 import moment from "moment"
 import { useMemo } from "react"
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts"
+import { Line } from "react-chartjs-2"
+
+Chart.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  TimeScale
+)
+
+const commonOptions = {
+  animation: {
+    duration: 0,
+  },
+  responsive: true,
+  maintainAspectRatio: false,
+}
 
 export function MainChart({
   stats,
   height,
-  interval,
 }: {
-  stats: ParsedRecord[]
+  stats: TimeRecord[]
   height: number
-  interval: GraphInterval
 }) {
-  const timeFormatter = (time: number) => {
-    return moment.unix(time).format(DATETIME_FORMAT)
-  }
-  const ticks = useMemo(() => {
-    const result: number[] = []
-    let nextInstant = moment().subtract(1, "day").startOf("hour")
-    result.push(nextInstant.unix())
-    while (nextInstant.isBefore(moment())) {
-      nextInstant = nextInstant.clone().add(30, "minutes")
-      result.push(nextInstant.unix())
-    }
-    return result
-  }, [interval])
+  const temperatures = useMemo(() => {
+    return stats.map((r) => ({
+      x: moment(r.timestamp),
+      y: r.temperature,
+    }))
+  }, [stats])
+
+  const humidities = useMemo(() => {
+    return stats.map((r) => ({
+      x: moment(r.timestamp),
+      y: r.humidity,
+    }))
+  }, [stats])
 
   return (
     <div>
-      <ResponsiveContainer
-        width="100%"
-        height={height / 2}
-        className="px-8 py-8"
-      >
-        <LineChart syncId={"sync"} width={500} height={300} data={stats}>
-          <XAxis
-            scale={"time"}
-            dataKey={"timestamp"}
-            tickFormatter={timeFormatter}
-            type="number"
-            domain={["auto", "auto"]}
-            ticks={ticks}
-          />
-          <YAxis domain={[0, 50]} />
-          <Tooltip
-            wrapperStyle={{ outline: "none" }}
-            formatter={(value) => [
-              `${value} ${TEMPERATURE_SUFFIX}`,
-              "Temperature",
-            ]}
-            labelFormatter={(label) =>
-              moment.unix(Number(label)).format(DATETIME_FORMAT)
-            }
-          />
-          <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-          <Line
-            type="monotone"
-            dataKey="temperature"
-            stroke="#82ca9d"
-            activeDot={{ r: 8 }}
-            dot={false}
-            isAnimationActive={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-
-      <ResponsiveContainer
-        width="100%"
-        height={height / 2}
-        className="px-8 py-8"
-      >
-        <LineChart syncId={"sync"} width={500} height={300} data={stats}>
-          <XAxis
-            scale={"time"}
-            dataKey={"timestamp"}
-            tickFormatter={timeFormatter}
-            type="number"
-            domain={["auto", "auto"]}
-            ticks={ticks}
-          />
-          <Tooltip
-            wrapperStyle={{ outline: "none" }}
-            formatter={(value) => [`${value} ${HUMIDITY_SUFFIX}`, "Humidity"]}
-            labelFormatter={(label) =>
-              moment.unix(Number(label)).format(DATETIME_FORMAT)
-            }
-          />
-          <YAxis domain={[20, 90]} />
-          <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-          <Line
-            type="monotone"
-            dataKey="humidity"
-            stroke="#8884d8"
-            activeDot={{ r: 8 }}
-            dot={false}
-            isAnimationActive={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+      <div className="relative">
+        <Line
+          height={height / 2}
+          title={`Temperature (${TEMPERATURE_SUFFIX})`}
+          options={{
+            ...commonOptions,
+            scales: {
+              x: {
+                type: "time",
+                ticks: {
+                  source: "data",
+                  callback: (value) =>
+                    moment(Number(value)).format(DATETIME_FORMAT),
+                },
+              },
+              y: {
+                min: 0,
+                max: 50,
+              },
+            },
+          }}
+          data={{
+            datasets: [{ label: "Temperature", data: temperatures }],
+          }}
+        ></Line>
+      </div>
+      <div>
+        <Line
+          height={height / 2}
+          title={`Humidity (${HUMIDITY_SUFFIX})`}
+          options={{
+            ...commonOptions,
+            scales: {
+              x: {
+                type: "time",
+                ticks: {
+                  source: "data",
+                  callback: (value) =>
+                    moment(Number(value)).format(DATETIME_FORMAT),
+                },
+              },
+              y: {
+                min: 20,
+                max: 70,
+              },
+            },
+          }}
+          data={{
+            datasets: [{ label: "Humidity", data: humidities }],
+          }}
+        ></Line>
+      </div>
     </div>
   )
 }

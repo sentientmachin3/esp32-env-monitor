@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-type UnitStatus string
-
 type UnitConnectionData struct {
 	Status     UnitStatus `json:"unitStatus"`
 	LastUpdate *time.Time `json:"lastUpdate"`
@@ -29,9 +27,21 @@ type Record struct {
 	Temperature int       `db:"temperature" json:"temperature"`
 }
 
+type UnitStatus string
+
 const (
 	Online  UnitStatus = "online"
 	Offline UnitStatus = "offline"
+)
+
+type RecordInterval string
+
+const (
+	OneDay   RecordInterval = "1d"
+	HalfHour RecordInterval = "30m"
+	OneWeek  RecordInterval = "1w"
+	TwoWeeks RecordInterval = "2w"
+	OneMonth RecordInterval = "1M"
 )
 
 type Service struct {
@@ -39,8 +49,8 @@ type Service struct {
 	registeredUnits map[int]UnitConnectionData
 }
 
-func (service *Service) FetchRecords(start time.Time, end time.Time) ([]*Record, error) {
-	result, err := service.db.Query("SELECT * FROM records WHERE ts BETWEEN $1 AND $2", start, end)
+func (service *Service) FetchRecords(start time.Time, end time.Time, interval RecordInterval) ([]*Record, error) {
+	result, err := service.db.Query("SELECT id, ts, temperature, humidity FROM records WHERE ts BETWEEN $1 AND $2", start, end)
 	if err != nil {
 		log.Errorln("interval records failed", err)
 		return make([]*Record, 0), err
@@ -48,33 +58,18 @@ func (service *Service) FetchRecords(start time.Time, end time.Time) ([]*Record,
 	var records []*Record = make([]*Record, 0)
 	for result.Next() {
 		var record *Record = &Record{Id: 0, Timestamp: time.Now(), Humidity: 0, Temperature: 0}
-		result.Scan(&record.Id, &record.Humidity, &record.Temperature, &record.Timestamp)
+		result.Scan(&record.Id, &record.Timestamp, &record.Temperature, &record.Humidity)
 		records = append(records, record)
 	}
-	return records, nil
-}
-
-func (service *Service) FetchAllRecords() ([]*Record, error) {
-	result, err := service.db.Query("SELECT * FROM records;")
-	if err != nil {
-		log.Errorln("error retrieving all records", err)
-		return make([]*Record, 0), err
-	}
-	var records []*Record = make([]*Record, 0)
-	for result.Next() {
-		var record *Record = &Record{Id: 0, Timestamp: time.Now(), Humidity: 0, Temperature: 0}
-		result.Scan(&record.Id, &record.Humidity, &record.Temperature, &record.Timestamp)
-		records = append(records, record)
-	}
-	return records, nil
+	return service.condensate(records, interval), nil
 }
 
 func (service *Service) LastKnownRecord() *Record {
-	result, _ := service.db.Query("SELECT * FROM records ORDER BY ts DESC LIMIT 1;")
+	result, _ := service.db.Query("SELECT id, ts, humidity, temperature FROM records ORDER BY ts DESC LIMIT 1;")
 	if result.Next() {
-		var record Record = Record{Id: 0, Timestamp: time.Now(), Humidity: 0, Temperature: 0}
+		var record *Record = &Record{Id: 0, Timestamp: time.Now(), Humidity: 0, Temperature: 0}
 		result.Scan(record.Id, record.Timestamp, record.Humidity, record.Temperature)
-		return &record
+		return record
 	}
 	return nil
 }
@@ -119,5 +114,50 @@ func (service *Service) AppendReading(data string) {
 	_, err := service.db.Exec("INSERT INTO records(ts, temperature, humidity) VALUES ($1, $2, $3)", time.Now(), temperature/10, humidity/10)
 	if err != nil {
 		log.Errorln("Service.AppendReading", err)
+	}
+}
+
+func (service *Service) condensate(records []*Record, interval RecordInterval) []*Record {
+	filtered := make([]*Record, 0)
+	if len(records) == 0 {
+		return filtered
+	}
+	granularity, _ := time.ParseDuration("1m")
+	switch interval {
+	case OneWeek:
+		granularity, _ = time.ParseDuration("1h")
+	case OneDay:
+		granularity, _ = time.ParseDuration("30m")
+	case OneMonth:
+		granularity, _ = time.ParseDuration("6h")
+	case HalfHour:
+		granularity, _ = time.ParseDuration("1m")
+	case TwoWeeks:
+		granularity, _ = time.ParseDuration("6h")
+	}
+	filtered = append(filtered, records[0])
+	for _, r := range records {
+		lastRecord := filtered[len(filtered)-1]
+		if r.Timestamp.After(lastRecord.Timestamp.Add(granularity)) {
+			filtered = append(filtered, r)
+		}
+	}
+	return filtered
+}
+
+func (service *Service) IntervalToDuration(interval RecordInterval) time.Duration {
+	switch interval {
+	case OneWeek:
+		return 7 * 24 * time.Hour
+	case OneDay:
+		return 24 * time.Hour
+	case OneMonth:
+		return 30 * 24 * time.Hour
+	case HalfHour:
+		return 30 * time.Minute
+	case TwoWeeks:
+		return 14 * 24 * time.Hour
+	default:
+		return 30 * time.Minute
 	}
 }

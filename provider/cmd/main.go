@@ -34,6 +34,8 @@ func tcpHandler(service Service) {
 
 func httpHandler(service Service) {
 	log.Debugln("setting up http endpoints")
+	// Just to remove the default gin logger
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(cors.Default())

@@ -2,33 +2,35 @@ package main
 
 import (
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRoutes(r *gin.Engine, service *Service) {
-	r.GET("/records", handleRecords(service))
+	r.GET("/records", handleRecordsByInterval(service))
 	r.GET("/status", handleStatus(service))
 }
 
-func handleRecords(service *Service) gin.HandlerFunc {
+func handleRecordsByInterval(service *Service) gin.HandlerFunc {
 	return func(context *gin.Context) {
 		query := context.Request.URL.Query()
+		allowedIntervals := []RecordInterval{HalfHour, OneDay, OneWeek, OneMonth, TwoWeeks}
+		requestedInterval := RecordInterval(query.Get("interval"))
+		if !slices.Contains(allowedIntervals, requestedInterval) {
+			context.Status(http.StatusBadRequest)
+			return
+		}
 		var jsonRows []*Record
-		if len(query) == 0 {
-			records, _ := service.FetchAllRecords()
-			jsonRows = records
-		} else {
-			intervalStart, _ := time.Parse(time.RFC3339, query.Get("start"))
-			intervalEnd, _ := time.Parse(time.RFC3339, query.Get("end"))
-			log.Debugf("requested logs from %v to %v", intervalStart, intervalEnd)
-			records, err := service.FetchRecords(intervalStart, intervalEnd)
-			jsonRows = records
-			if err != nil {
-				context.Status(http.StatusInternalServerError)
-				return
-			}
+		log.Debugf("request logs in last %v", requestedInterval)
+		intervalStart := time.Now().Add(-service.IntervalToDuration(requestedInterval))
+		intervalEnd := time.Now()
+		records, err := service.FetchRecords(intervalStart, intervalEnd, requestedInterval)
+		jsonRows = records
+		if err != nil {
+			context.Status(http.StatusInternalServerError)
+			return
 		}
 		context.JSON(http.StatusOK, jsonRows)
 	}

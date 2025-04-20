@@ -1,100 +1,104 @@
 "use client"
 
-import { MainChart } from "@/components/MainChart"
-import { ValueBox } from "@/components/ValueBox"
-import { ParsedRecord, Record } from "@/types"
-import { httpClient, HUMIDITY_SUFFIX, TEMPERATURE_SUFFIX } from "@/utils"
-import { Spinner } from "@nextui-org/spinner"
+import { IntervalSelector, MainChart, StatusBox, ValueBox } from "@/components"
+import { GraphInterval } from "@/enums"
+import { useRecords, useUnitStatus } from "@/hooks"
+import { TimeRecord } from "@/types"
+import { DATETIME_FORMAT, HUMIDITY_SUFFIX, TEMPERATURE_SUFFIX } from "@/utils"
 import { Button } from "@nextui-org/button"
+import { Spinner } from "@nextui-org/spinner"
 import moment from "moment-timezone"
 import { useEffect, useState } from "react"
-import { StatusBox } from "@/components/StatusBox"
-import { UnitConnectionStatus } from "@/types/UnitConnectionStatus"
-import { GraphInterval } from "@/enums"
+
+const REFRESH_PERIOD_MS = 10_000
 
 export default function Home() {
-  const [records, setRecords] = useState<ParsedRecord[]>([])
-  const [unitStatus, setUnitStatus] = useState<
-    UnitConnectionStatus | undefined
-  >()
-  const [loading, setLoading] = useState(false)
   const [height, setHeight] = useState(920)
+  const [timeframe, setTimeFrame] = useState(GraphInterval.HALF_HOUR)
+  const {
+    data: records,
+    handler: refreshRecords,
+    loading: recordsLoading,
+  } = useRecords(timeframe)
+  const {
+    data: unitStatus,
+    handler: refreshStatus,
+    loading: statusLoading,
+  } = useUnitStatus()
 
-  const refreshUnitStatus = () => {
-    httpClient.get<UnitConnectionStatus>("/status").then((res) => {
-      setUnitStatus(res.data)
-    })
+  const timeToRender = (records: TimeRecord[]) => {
+    const instant = records[records.length - 1]?.timestamp
+    if (instant === undefined) {
+      return "--/--/-- --:--:--"
+    } else {
+      return moment(instant).format(DATETIME_FORMAT)
+    }
   }
 
-  const refreshData = () => {
-    setLoading(true)
-    const now = moment()
-    const oneDayBefore = moment().subtract(1, "day")
-    httpClient
-      .get<
-        Record[]
-      >("/records", { params: { start: oneDayBefore.toISOString(), end: now.toISOString() } })
-      .then((res) => {
-        const incomingStats: ParsedRecord[] = (res.data as Record[])
-          .filter((s) => s.humidity !== 0 || s.temperature !== 0)
-          .sort((s1, s2) =>
-            moment(s1.timestamp).isBefore(moment(s2.timestamp)) ? -1 : 1
-          )
-          .map((s) => ({
-            ...s,
-            timestamp: moment(s.timestamp).unix(),
-          }))
-        setRecords(incomingStats)
-        setLoading(false)
-      })
-  }
-
-  const lastStat: (stats: ParsedRecord[]) => ParsedRecord | undefined = (
-    stats: ParsedRecord[]
+  const lastStat: (stats: TimeRecord[]) => TimeRecord | undefined = (
+    stats: TimeRecord[]
   ) => stats[stats.length - 1]
 
   useEffect(() => {
-    refreshData()
-    refreshUnitStatus()
-    setInterval(() => refreshData(), 10_000)
+    refreshRecords()
+    refreshStatus()
     setHeight(window.innerHeight)
-  }, [])
+    const refreshInterval = setInterval(
+      () => refreshRecords(),
+      REFRESH_PERIOD_MS
+    )
+    return () => clearInterval(refreshInterval)
+  }, [timeframe])
+
+  const radioCommonProps =
+    "flex justify-center uppercase font-semibold rounded-md border-2 border-solid border-black"
 
   return (
-    <div className="flex px-8 py-6 h-full">
-      <div
-        className="flex flex-col max-w-15 gap-4"
-        suppressHydrationWarning={true}
-      >
+    <div className="flex px-8 py-6 h-full min-h-screen">
+      <div className="flex flex-col max-w-15 gap-4">
         <StatusBox unitStatus={unitStatus} />
         <ValueBox
           label={"Temperature"}
-          value={lastStat(records)?.temperature}
-          moment={moment(records[records.length - 1]?.timestamp)}
+          value={lastStat(records ?? [])?.temperature}
+          time={timeToRender(records ?? [])}
           suffix={TEMPERATURE_SUFFIX}
         />
         <ValueBox
           label={"Humidity"}
-          value={lastStat(records)?.humidity}
-          moment={moment(records[records.length - 1]?.timestamp)}
+          value={lastStat(records ?? [])?.humidity}
+          time={timeToRender(records ?? [])}
           suffix={HUMIDITY_SUFFIX}
         />
         <Button
           className="flex bg-black text-white font-semibold uppercase justify-center rounded-md px-2 py-2 outline-none"
-          onPress={() => refreshData()}
+          onPress={refreshRecords}
         >
-          {loading ? <Spinner color="white" label={"loading..."} /> : "Refresh"}
+          {recordsLoading || statusLoading ? (
+            <Spinner color="white" label={"loading..."} />
+          ) : (
+            "Refresh"
+          )}
         </Button>
+        <IntervalSelector
+          containerStyle={"flex flex-col gap-2 py-4"}
+          selected={timeframe}
+          selectedItemStyle={`${radioCommonProps} text-white bg-black`}
+          unselectedItemStyle={`${radioCommonProps} text-black bg-white`}
+          onSelect={setTimeFrame}
+          intervals={[
+            GraphInterval.ONE_DAY,
+            GraphInterval.ONE_WEEK,
+            GraphInterval.ONE_MONTH,
+            GraphInterval.TWO_WEEKS,
+            GraphInterval.HALF_HOUR,
+          ]}
+        />
       </div>
-      {loading || records.length === 0 ? (
+      {records === undefined || records.length === 0 ? (
         <Spinner />
       ) : (
         <div className="flex-1">
-          <MainChart
-            stats={records}
-            height={height}
-            interval={GraphInterval.ONE_DAY}
-          />
+          <MainChart stats={records} height={height * 0.9} />
         </div>
       )}
     </div>

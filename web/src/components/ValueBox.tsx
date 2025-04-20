@@ -1,27 +1,23 @@
 "use client"
 
-import { DATETIME_FORMAT } from "@/utils"
 import { Card, CardBody, CardHeader } from "@nextui-org/card"
-import { Moment } from "moment"
 
 export function ValueBox({
   label,
   value,
-  moment,
+  time,
   suffix,
 }: {
   label: string
   value: number | undefined
-  moment: Moment
+  time: string
   suffix: string
 }) {
   return (
     <Card className="min-w-40 border-black rounded-md border-2 px-2 py-2">
       <CardHeader className="flex-col text-center">
-        <p className="uppercase tracking-wide">{label}</p>
-        <small className="font-semibold text-lg">
-          {moment ? moment.format(DATETIME_FORMAT) : "--/--/-- --:--:--"}
-        </small>
+        <div className="uppercase tracking-wide">{label}</div>
+        <div className="font-semibold text-lg">{time}</div>
       </CardHeader>
       <CardBody className="p-2 font-bold text-5xl text-center">{`${value ?? "--"} ${suffix}`}</CardBody>
     </Card>
