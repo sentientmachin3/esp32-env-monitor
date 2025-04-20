@@ -82,4 +82,9 @@ dump-db: ## Dump the database content
 lint: ## Run linter on the codebase
 	cd web && pnpm exec eslint ./src && cd ..
 
+.PHONY: update-web-deps
+update-web-deps:
+	docker compose down web && docker compose build web && docker compose up -d web
+	
+
 

@@ -73,8 +73,11 @@ export default function Home() {
     return () => clearInterval(refreshInterval)
   }, [timeframe])
 
+  const radioCommonProps =
+    "flex justify-center uppercase font-semibold rounded-md border-2 border-solid border-black"
+
   return (
-    <div className="flex px-8 py-6 h-full">
+    <div className="flex px-8 py-6 h-full min-h-screen">
       <div className="flex flex-col max-w-15 gap-4">
         <StatusBox unitStatus={unitStatus} />
         <ValueBox
@@ -96,11 +99,10 @@ export default function Home() {
           {loading ? <Spinner color="white" label={"loading..."} /> : "Refresh"}
         </Button>
         <IntervalSelector
+          containerStyle={"flex flex-col gap-2 py-4"}
           selected={timeframe}
-          itemStyle={
-            "bg-black text-white font-semibold uppercase justify-center rounded-md px-2 py-2 outline-none"
-          }
-          containerStyle={"py-2 flex flex-col gap-y-2"}
+          selectedItemStyle={`${radioCommonProps} text-white bg-black`}
+          unselectedItemStyle={`${radioCommonProps} text-black bg-white`}
           onSelect={setTimeFrame}
           intervals={[
             GraphInterval.ONE_DAY,

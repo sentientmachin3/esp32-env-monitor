@@ -9,13 +9,15 @@ const INTERVAL_TRANSLATIONS: Record<GraphInterval, string> = {
 }
 export function IntervalSelector({
   containerStyle,
-  itemStyle,
+  selectedItemStyle,
+  unselectedItemStyle,
   intervals,
   onSelect,
   selected,
 }: {
   containerStyle: string
-  itemStyle: string
+  selectedItemStyle: string
+  unselectedItemStyle: string
   intervals: GraphInterval[]
   onSelect: (interval: GraphInterval) => void
   selected: GraphInterval
@@ -23,16 +25,19 @@ export function IntervalSelector({
   return (
     <div className={containerStyle}>
       {intervals.map((i) => (
-        <div key={`interval_${i}`}>
+        <label
+          key={`interval_${i}`}
+          className={selected === i ? selectedItemStyle : unselectedItemStyle}
+        >
+          <div>{INTERVAL_TRANSLATIONS[i]}</div>
           <input
             type={"radio"}
-            className={itemStyle}
+            className={`sr-only`}
             value={i}
             onChange={() => onSelect(i)}
             checked={selected === i}
           />
-          <label>{INTERVAL_TRANSLATIONS[i]}</label>
-        </div>
+        </label>
       ))}
     </div>
   )
