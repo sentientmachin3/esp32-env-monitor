@@ -12,6 +12,7 @@ import {
   Title,
 } from "chart.js"
 import "chartjs-adapter-moment"
+import Annotation from "chartjs-plugin-annotation"
 import moment from "moment"
 import { useMemo } from "react"
 import { Line } from "react-chartjs-2"
@@ -22,7 +23,8 @@ Chart.register(
   PointElement,
   LineElement,
   Title,
-  TimeScale
+  TimeScale,
+  Annotation
 )
 
 const commonOptions = {
@@ -33,12 +35,17 @@ const commonOptions = {
   maintainAspectRatio: false,
 }
 
+const META_AVG_COLOR = "#7e7af4"
+const DATA_COLOR = "#cdcec8"
+
 export function MainChart({
   stats,
   height,
+  meta,
 }: {
   stats: TimeRecord[]
   height: number
+  meta: { avg: { humidity: number; temperature: number } }
 }) {
   const temperatures = useMemo(() => {
     return stats.map((r) => ({
@@ -76,9 +83,34 @@ export function MainChart({
                 max: 50,
               },
             },
+            plugins: {
+              annotation: {
+                annotations: [
+                  {
+                    type: "line",
+                    yMin: meta.avg.temperature,
+                    yMax: meta.avg.temperature,
+                    borderColor: META_AVG_COLOR,
+                    borderWidth: 2,
+                    label: {
+                      display: true,
+                      backgroundColor: META_AVG_COLOR,
+                      drawTime: "afterDatasetsDraw",
+                      content: `AVG ${meta.avg.temperature} ${TEMPERATURE_SUFFIX}`,
+                    },
+                  },
+                ],
+              },
+            },
           }}
           data={{
-            datasets: [{ label: "Temperature", data: temperatures }],
+            datasets: [
+              {
+                label: "Temperature",
+                data: temperatures,
+                borderColor: DATA_COLOR,
+              },
+            ],
           }}
         ></Line>
       </div>
@@ -102,9 +134,30 @@ export function MainChart({
                 max: 70,
               },
             },
+            plugins: {
+              annotation: {
+                annotations: [
+                  {
+                    type: "line",
+                    yMin: meta.avg.humidity,
+                    yMax: meta.avg.humidity,
+                    borderColor: META_AVG_COLOR,
+                    borderWidth: 2,
+                    label: {
+                      display: true,
+                      backgroundColor: META_AVG_COLOR,
+                      drawTime: "afterDatasetsDraw",
+                      content: `AVG ${meta.avg.humidity} ${HUMIDITY_SUFFIX}`,
+                    },
+                  },
+                ],
+              },
+            },
           }}
           data={{
-            datasets: [{ label: "Humidity", data: humidities }],
+            datasets: [
+              { label: "Humidity", data: humidities, borderColor: DATA_COLOR },
+            ],
           }}
         ></Line>
       </div>

@@ -5,9 +5,11 @@ import { TimeRecord } from "@/types"
 export function DataView({
   records,
   height,
+  meta,
 }: {
   records: TimeRecord[] | undefined
   height: number
+  meta: { avg: { humidity: number; temperature: number } }
 }) {
   if (records === undefined) {
     return <Spinner />
@@ -24,7 +26,11 @@ export function DataView({
     </div>
   ) : (
     <div className="flex-1">
-      <MainChart stats={records as TimeRecord[]} height={height * 0.9} />
+      <MainChart
+        stats={records as TimeRecord[]}
+        meta={meta}
+        height={height * 0.9}
+      />
     </div>
   )
 }

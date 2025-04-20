@@ -4,7 +4,12 @@ import { IntervalSelector, StatusBox, ValueBox, DataView } from "@/components"
 import { GraphInterval } from "@/enums"
 import { useRecords, useUnitStatus } from "@/hooks"
 import { TimeRecord } from "@/types"
-import { DATETIME_FORMAT, HUMIDITY_SUFFIX, TEMPERATURE_SUFFIX } from "@/utils"
+import {
+  avg,
+  DATETIME_FORMAT,
+  HUMIDITY_SUFFIX,
+  TEMPERATURE_SUFFIX,
+} from "@/utils"
 import { Button } from "@nextui-org/button"
 import { Spinner } from "@heroui/spinner"
 import moment from "moment-timezone"
@@ -94,7 +99,16 @@ export default function Home() {
           ]}
         />
       </div>
-      <DataView records={records} height={height} />
+      <DataView
+        records={records}
+        height={height}
+        meta={{
+          avg: {
+            temperature: avg((records ?? []).map((r) => r.temperature)),
+            humidity: avg((records ?? []).map((r) => r.humidity)),
+          },
+        }}
+      />
     </div>
   )
 }
