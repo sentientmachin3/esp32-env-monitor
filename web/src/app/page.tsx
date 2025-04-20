@@ -55,7 +55,7 @@ export default function Home() {
 
   return (
     <div className="flex px-8 py-6 h-full min-h-screen">
-      <div className="flex flex-col max-w-15 gap-4">
+      <div className="flex flex-col w-15 gap-4">
         <StatusBox unitStatus={unitStatus} />
         <ValueBox
           label={"Temperature"}

@@ -13,7 +13,15 @@ export function DataView({
     return <Spinner />
   }
   return (records as TimeRecord[]).length === 0 ? (
-    <div></div>
+    <div className={"flex w-full justify-center items-center "}>
+      <div
+        className={
+          "text-red-600 font-bold border-2 border-red-600 uppercase text-xl px-4 py-4"
+        }
+      >
+        {"There are no records in the selected time frame"}
+      </div>
+    </div>
   ) : (
     <div className="flex-1">
       <MainChart stats={records as TimeRecord[]} height={height * 0.9} />

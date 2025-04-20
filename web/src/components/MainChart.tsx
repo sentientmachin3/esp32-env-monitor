@@ -82,7 +82,7 @@ export function MainChart({
           }}
         ></Line>
       </div>
-      <div>
+      <div className={"relative"}>
         <Line
           height={height / 2}
           title={`Humidity (${HUMIDITY_SUFFIX})`}
