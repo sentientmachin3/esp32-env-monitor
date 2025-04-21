@@ -1,7 +1,8 @@
 "use client"
 
+import { GraphInterval } from "@/enums"
 import { TimeRecord } from "@/types"
-import { DATETIME_FORMAT, HUMIDITY_SUFFIX, TEMPERATURE_SUFFIX } from "@/utils"
+import { HUMIDITY_SUFFIX, TEMPERATURE_SUFFIX, tickFormatter } from "@/utils"
 import {
   CategoryScale,
   Chart,
@@ -41,10 +42,12 @@ const DATA_COLOR = "#cdcec8"
 export function MainChart({
   stats,
   height,
+  interval,
   meta,
 }: {
   stats: TimeRecord[]
   height: number
+  interval: GraphInterval
   meta: { avg: { humidity: number; temperature: number } }
 }) {
   const temperatures = useMemo(() => {
@@ -74,8 +77,7 @@ export function MainChart({
                 type: "time",
                 ticks: {
                   source: "data",
-                  callback: (value) =>
-                    moment(Number(value)).format(DATETIME_FORMAT),
+                  callback: (value) => tickFormatter(interval, value),
                 },
               },
               y: {
@@ -130,8 +132,7 @@ export function MainChart({
                 type: "time",
                 ticks: {
                   source: "data",
-                  callback: (value) =>
-                    moment(Number(value)).format(DATETIME_FORMAT),
+                  callback: (value) => tickFormatter(interval, value),
                 },
               },
               y: {

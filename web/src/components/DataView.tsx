@@ -1,14 +1,17 @@
 import { Spinner } from "@heroui/spinner"
 import { MainChart } from "./MainChart"
 import { TimeRecord } from "@/types"
+import { GraphInterval } from "@/enums"
 
 export function DataView({
   records,
   height,
+  interval,
   meta,
 }: {
   records: TimeRecord[] | undefined
   height: number
+  interval: GraphInterval
   meta: { avg: { humidity: number; temperature: number } }
 }) {
   if (records === undefined) {
@@ -28,6 +31,7 @@ export function DataView({
     <div className="flex-1">
       <MainChart
         stats={records as TimeRecord[]}
+        interval={interval}
         meta={meta}
         height={height * 0.9}
       />
