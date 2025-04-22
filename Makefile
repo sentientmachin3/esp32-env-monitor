@@ -85,6 +85,16 @@ lint: ## Run linter on the codebase
 .PHONY: update-web-deps
 update-web-deps:
 	docker compose down web && docker compose build web && docker compose up -d web
+
+.PHONY: prod-build
+prod-build: ## Builds projects for production
+	cd provider && ./build.sh && cd ..
+	cd web && ./build.sh && cd ..
+	idf.py -C sensing app
+
+.PHONY: prod-compose
+prod-compose: ## Build compose project for production
+	docker compose -f docker-compose.prod.yml build
 	
 
 
