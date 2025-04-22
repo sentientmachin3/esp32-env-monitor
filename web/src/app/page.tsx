@@ -102,6 +102,7 @@ export default function Home() {
       <DataView
         records={records}
         height={height}
+        interval={timeframe}
         meta={{
           avg: {
             temperature: avg((records ?? []).map((r) => r.temperature)),

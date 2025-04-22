@@ -45,7 +45,7 @@ func handleSocketData(conn net.Conn, service *Service) {
 		msgType, _ := strconv.Atoi(string(data[0]))
 		log.Debugf("received msg %s type %v", data, msgType)
 		if msgType == MSG_TYPE_HANDSHAKE {
-			service.UnitConnection(data)
+			service.UnitConnection(data, conn.RemoteAddr())
 		} else if msgType == MSG_TYPE_TELEMETRY {
 			service.AppendReading(data)
 		} else {

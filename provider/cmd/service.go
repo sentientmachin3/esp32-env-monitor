@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"net"
 	"strconv"
 	"strings"
 	"time"
@@ -86,34 +87,63 @@ func (service *Service) GetUnitStatus() UnitConnectionData {
 	return UnitConnectionData{Status: Online, LastUpdate: &lastRecord.Timestamp}
 }
 
-func (service *Service) UnitConnection(data string) {
+func (service *Service) UnitConnection(data string, ip net.Addr) {
 	values := strings.Split(data, ",")
 	unitId, _ := strconv.Atoi(values[1])
 	timestamp := time.Now()
 	service.registeredUnits[unitId] = UnitConnectionData{Status: Online, LastUpdate: &timestamp}
-	unitRow := service.db.QueryRow("SELECT * FROM unit WHERE id = $1", unitId)
-	var currentUnit Unit
-	err := unitRow.Scan(&currentUnit.Id, &currentUnit.Name, &currentUnit.LastUpdate, &currentUnit.IpAddr, &currentUnit.CurrentStatus)
-	if err == sql.ErrNoRows {
-		log.Infoln("new unit detected", unitId)
-		_, err := service.db.Exec("INSERT INTO unit (id, name, last_update, ip_addr, current_status) VALUES (DEFAULT, $1, $2, $3, $4)", "", timestamp, "", Online)
-		if err != nil {
-			log.Infoln(err)
-		}
+	unit, err := service.unitData(unitId)
+	unitIp := strings.Split(ip.String(), ":")[0]
+	if err != nil {
+		// Generic error
+		log.Errorln("Service.UnitConnection", err)
 		return
 	}
+	if unit != nil {
+		// unit found, update its status
+		service.updateUnitStatus(unitId, unitIp, timestamp, Online)
+		return
+	}
+	// unit nil and err nil => new unit
+	service.newUnit(unitId)
+}
+
+func (service *Service) AppendReading(data string) {
+	values := strings.Split(data, ",")
+	unitId, _ := strconv.Atoi(values[0])
+	humidity, _ := strconv.Atoi(values[1])
+	temperature, _ := strconv.Atoi(values[2])
+	_, err := service.db.Exec("INSERT INTO records(ts, temperature, humidity) VALUES ($1, $2, $3)", time.Now(), temperature/10, humidity/10)
+	unit, _ := service.unitData(unitId)
+	service.updateUnitStatus(unitId, *unit.IpAddr, time.Now(), Online)
+	if err != nil {
+		log.Errorln("Service.AppendReading", err)
+	}
+}
+
+func (service *Service) updateUnitStatus(unitId int, ip string, timestamp time.Time, status UnitStatus) {
+	_, err := service.db.Exec("UPDATE unit SET last_update = $1, ip_addr = $2, current_status = $3 WHERE id = $4", timestamp, ip, Online, unitId)
 	if err != nil {
 		log.Errorln("Service.UnitConnection", err)
 	}
 }
 
-func (service *Service) AppendReading(data string) {
-	values := strings.Split(data, ",")
-	temperature, _ := strconv.Atoi(values[1])
-	humidity, _ := strconv.Atoi(values[2])
-	_, err := service.db.Exec("INSERT INTO records(ts, temperature, humidity) VALUES ($1, $2, $3)", time.Now(), temperature/10, humidity/10)
+func (service *Service) unitData(unitId int) (*Unit, error) {
+	unitRow := service.db.QueryRow("SELECT * FROM unit WHERE id = $1", unitId)
+	var currentUnit Unit
+	err := unitRow.Scan(&currentUnit.Id, &currentUnit.Name, &currentUnit.LastUpdate, &currentUnit.IpAddr, &currentUnit.CurrentStatus)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	return &currentUnit, err
+}
+
+func (service *Service) newUnit(id int) {
+	log.Infoln("new unit detected", id)
+	timestamp := time.Now()
+	_, err := service.db.Exec("INSERT INTO unit (id, name, last_update, ip_addr, current_status) VALUES (DEFAULT, $1, $2, $3, $4)", "", timestamp, "", Online)
 	if err != nil {
-		log.Errorln("Service.AppendReading", err)
+		log.Errorln(err)
 	}
 }
 
